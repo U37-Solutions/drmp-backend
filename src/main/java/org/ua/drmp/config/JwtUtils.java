@@ -4,6 +4,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,26 +17,47 @@ import org.ua.drmp.dto.JwtProperties;
 public class JwtUtils {
 	private final JwtProperties jwtProperties;
 
-	public String generateJwtToken(UserDetails userDetails) {
+	public String generateAccessToken(UserDetails userDetails) {
 		return Jwts.builder()
 			.setSubject(userDetails.getUsername())
+			.signWith(getSignKey(), SignatureAlgorithm.HS256)
 			.setIssuedAt(new Date())
-			.setExpiration(new Date((new Date()).getTime() + jwtProperties.getExpiration()))
-			.signWith(Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes()), SignatureAlgorithm.HS512)
+			.setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
+			.compact();
+	}
+
+	public String generateRefreshToken(UserDetails userDetails) {
+		return Jwts.builder()
+			.setSubject(userDetails.getUsername())
+			.signWith(getSignKey(), SignatureAlgorithm.HS256)
+			.setIssuedAt(new Date())
+			.setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration() * 5))
 			.compact();
 	}
 
 	public String getEmailFromJwtToken(String token) {
-		return Jwts.parserBuilder().setSigningKey(jwtProperties.getSecret().getBytes()).build()
-			.parseClaimsJws(token).getBody().getSubject();
+		return Jwts.parserBuilder()
+			.setSigningKey(getSignKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.getSubject();
 	}
 
 	public boolean validateJwtToken(String authToken) {
 		try {
-			Jwts.parserBuilder().setSigningKey(jwtProperties.getSecret().getBytes()).build().parseClaimsJws(authToken);
+			Jwts.parserBuilder()
+				.setSigningKey(getSignKey())
+				.build()
+				.parseClaimsJws(authToken);
 			return true;
 		} catch (JwtException | IllegalArgumentException e) {
 			return false;
 		}
+	}
+
+	private Key getSignKey() {
+		byte[] keyBytes = Base64.getDecoder().decode(jwtProperties.getSecret());
+		return Keys.hmacShaKeyFor(keyBytes);
 	}
 }

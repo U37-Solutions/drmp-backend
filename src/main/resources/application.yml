@@ -12,5 +12,5 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 jwt:
-  secret: admin
+  secret: Z3Vnci1zZWN1cmUta2V5LWRhdGEtMTIzNDU2Nzg5MDEyMw==
   expiration: 3600000 # 1 година
