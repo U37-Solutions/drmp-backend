@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
 	private final CustomUserDetailsService customUserDetailsService;
 	@Override
 	public void register(AuthRequest request) {
-		if (userRepository.existsByEmail(request.getEmail())) {
+		if (userRepository.existsByEmail(request.email())) {
 			throw new RuntimeException("Email already in use");
 		}
 
@@ -42,8 +42,8 @@ public class AuthServiceImpl implements AuthService {
 			.orElseThrow(() -> new RuntimeException("Default role not found"));
 
 		User user = User.builder()
-			.email(request.getEmail())
-			.password(passwordEncoder.encode(request.getPassword()))
+			.email(request.email())
+			.password(passwordEncoder.encode(request.password()))
 			.roles(Set.of(role))
 			.build();
 
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public Map<String, String> login(AuthRequest request) {
 		Authentication auth = authManager.authenticate(
-			new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+			new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 		CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
 		User user = userDetails.getUser();
 
