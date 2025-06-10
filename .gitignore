@@ -13,6 +13,10 @@ target/
 .springBeans
 .sts4-cache
 
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
