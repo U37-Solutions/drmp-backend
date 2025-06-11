@@ -39,8 +39,18 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: DEVELOP
 
     steps:
       - name: Trigger Dokploy deployment
+        id: trigger
         run: |
-          curl -X POST "${{ vars.DOKPLOY_URL }}/api/deploy/${{ secrets.DEPLOY_APP_ID }}"
+          URL="${{ vars.DOKPLOY_URL }}/api/deploy/${{ secrets.DEPLOY_APP_ID }}"
+          status=$(curl --silent --output /dev/null --write-out "%{http_code}" "$URL")
+          echo "response=$status" >> $GITHUB_OUTPUT
+
+      - name: Check deployment trigger
+        if: steps.trigger.outputs.response != '200'
+        run: |
+          echo "::error::Deployment webhook fall with HTTP ${{ steps.trigger.outputs.response }}"
+          exit 1
