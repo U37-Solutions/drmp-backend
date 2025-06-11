@@ -1,5 +1,6 @@
 package org.ua.drmp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,11 +34,21 @@ public class User {
 	@Column(unique = true)
 	private String email;
 
+	@JsonIgnore
 	private String password;
+
+	private String firstName;
+
+	private String lastName;
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles",
 		joinColumns = @JoinColumn(name = "user_id"),
 		inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
+
+	public boolean hasRole(String roleName) {
+		return roles.stream()
+			.anyMatch(role -> role.getName().name().equalsIgnoreCase(roleName));
+	}
 }
