@@ -12,6 +12,6 @@ FROM openjdk:17.0.1-jdk-slim
 # Set the working directory in the container
 WORKDIR /app
 # Copy the built JAR file from the previous stage to the container
-COPY - from=build /app/target/drmp-backend.jar .
+COPY --from=build /app/target/drmp-backend.jar .
 # Set the command to run the application
 CMD ["java", "-jar", "drmp-backend.jar"]
