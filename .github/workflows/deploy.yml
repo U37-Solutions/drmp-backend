@@ -43,12 +43,6 @@ jobs:
     steps:
       - name: Trigger Dokploy deployment
         env:
-          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
-          APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
+          WEBHOOK_URL: ${{ vars.DOKPLOY_URL }}/api/deploy/${{ secrets.DEPLOY_APP_ID }}
         run: |
-          curl -vv -X POST \
-            -H "accept: application/json" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $DOKPLOY_API_KEY" \
-            -d "{\"applicationId\":\"$APP_ID\"}" \
-            https://${{ vars.DOKPLOY_DOMAIN }}/api/application.deploy
+          curl -X POST "$WEBHOOK_URL"
