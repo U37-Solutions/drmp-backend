@@ -42,7 +42,5 @@ jobs:
 
     steps:
       - name: Trigger Dokploy deployment
-        env:
-          WEBHOOK_URL: ${{ vars.DOKPLOY_URL }}/api/deploy/${{ secrets.DEPLOY_APP_ID }}
         run: |
-          curl -X POST "$WEBHOOK_URL"
+          curl -X POST "${{ vars.DOKPLOY_URL }}/api/deploy/${{ secrets.DEPLOY_APP_ID }}"
