@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
 			throw new RuntimeException("Email already in use");
 		}
 
-		Role role = roleRepository.findByName(DRMPRole.ROLE_USER)
+		Role role = roleRepository.findByName(DRMPRole.USER)
 			.orElseThrow(() -> new RuntimeException("Default role not found"));
 
 		User user = User.builder()
