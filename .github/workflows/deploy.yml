@@ -5,7 +5,7 @@ on:
     branches: ["build/add-dockerfile"]
 
 env:
-  NAMESPACE: DRMP
+  NAMESPACE: drmp
   PROJECT_NAME: backend
 
 jobs:
