@@ -5,7 +5,8 @@ on:
     branches: ["build/add-dockerfile"]
 
 env:
-  PROJECT_NAME: DRMP
+  NAMESPACE: DRMP
+  PROJECT_NAME: backend
 
 jobs:
   build-and-push:
@@ -31,7 +32,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_REGISTRY_URL }}/PROJECT_NAME/app:${{ github.sha }}
+          tags: |
+            ${{ env.NAMESPACE }}/${{ env.PROJECT_NAME }}:latest
+          platforms: linux/amd64 
 
   deploy:
     needs: build-and-push
@@ -45,11 +48,3 @@ jobs:
           curl -X POST "$DOKPLOY_WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -d '{"ref":"'"${{ github.ref }}"'"}'
-
-  cleanup:
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Delete Docker image artifact
-        run: rm -f ${{ env.IMAGE_FILE_PATH }}
