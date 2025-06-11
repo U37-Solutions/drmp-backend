@@ -15,4 +15,4 @@ WORKDIR /app
 COPY --from=build /app/target/drmp-0.0.1-SNAPSHOT.jar drmp-backend.jar
 # Set the command to run the application
 CMD ["sh", "-c", "env && java -jar drmp-backend.jar"]
-CMD ["java", "-jar", "drmp-backend.jar"]
+# CMD ["java", "-jar", "drmp-backend.jar"]
