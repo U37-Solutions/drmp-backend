@@ -26,12 +26,20 @@ public class SecurityConfig {
 	private final JwtAuthFilter jwtAuthFilter;
 	private final UserDetailsService userDetailsService;
 
+	private static final String[] SWAGGER_WHITELIST = {
+		"/swagger-ui/**",
+		"/swagger-ui.html",
+		"/v3/api-docs/**",
+		"/api-docs/**"
+	};
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
+				.requestMatchers(SWAGGER_WHITELIST).permitAll()
 				.requestMatchers("/auth/**").permitAll()
 				.requestMatchers("/auth/refresh").permitAll()
 
