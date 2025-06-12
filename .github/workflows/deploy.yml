@@ -1,0 +1,56 @@
+name: Push develop and Deploy
+ 
+on:
+  push:
+    branches: ["develop"]
+
+env:
+  NAMESPACE: drmp
+  PROJECT_NAME: backend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to private registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ vars.DOCKER_REGISTRY_URL }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ vars.DOCKER_REGISTRY_NAME }}/${{ env.NAMESPACE }}/${{ env.PROJECT_NAME }}:latest
+          platforms: linux/amd64 
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: DEVELOP
+
+    steps:
+      - name: Trigger Dokploy deployment
+        id: trigger
+        run: |
+          URL="${{ vars.DOKPLOY_URL }}/api/deploy/${{ secrets.DEPLOY_APP_ID }}"
+          status=$(curl --silent --output /dev/null --write-out "%{http_code}" "$URL")
+          echo "response=$status" >> $GITHUB_OUTPUT
+
+      - name: Check deployment trigger
+        if: steps.trigger.outputs.response != '200'
+        run: |
+          echo "::error::Deployment webhook fall with HTTP ${{ steps.trigger.outputs.response }}"
+          exit 1
