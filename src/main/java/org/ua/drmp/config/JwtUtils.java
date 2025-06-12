@@ -1,17 +1,16 @@
 package org.ua.drmp.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import java.security.Key;
-import java.util.Base64;
-import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.ua.drmp.dto.JwtProperties;
+
+import java.security.Key;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -36,21 +35,17 @@ public class JwtUtils {
 			.compact();
 	}
 
-	public String getEmailFromJwtToken(String token) {
-		return Jwts.parserBuilder()
-			.setSigningKey(getSignKey())
-			.build()
-			.parseClaimsJws(token)
-			.getBody()
-			.getSubject();
+	public Optional<String> tryGetEmail(String token) {
+		try {
+			return Optional.of(getClaims(token).getSubject());
+		} catch (JwtException | IllegalArgumentException e) {
+			return Optional.empty();
+		}
 	}
 
-	public boolean validateJwtToken(String authToken) {
+	public boolean validateJwtToken(String token) {
 		try {
-			Jwts.parserBuilder()
-				.setSigningKey(getSignKey())
-				.build()
-				.parseClaimsJws(authToken);
+			getClaims(token);
 			return true;
 		} catch (JwtException | IllegalArgumentException e) {
 			return false;
@@ -58,13 +53,16 @@ public class JwtUtils {
 	}
 
 	public Date getExpirationDateFromToken(String token) {
-		Claims claims = Jwts
+		return getClaims(token).getExpiration();
+	}
+
+	private Claims getClaims(String token) {
+		return Jwts
 			.parserBuilder()
 			.setSigningKey(getSignKey())
 			.build()
 			.parseClaimsJws(token)
 			.getBody();
-		return claims.getExpiration();
 	}
 
 	private Key getSignKey() {

@@ -1,6 +1,7 @@
 package org.ua.drmp.config;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,6 +17,9 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
+		if (user.getRoles() == null) {
+			return Set.of();
+		}
 		return user.getRoles().stream()
 			// add prefix ROLE_ because spring security expected that
 			.map(role -> new CustomGrantedAuthority("ROLE_" + role.getName().name()))
