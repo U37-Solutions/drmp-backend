@@ -32,6 +32,8 @@ public class Token {
 
 	private boolean refreshToken;
 
+	private String sessionId;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;

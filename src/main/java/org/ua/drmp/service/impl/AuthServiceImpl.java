@@ -1,11 +1,13 @@
 package org.ua.drmp.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
 	private final AuthenticationManager authManager;
 	private final JwtUtils jwtUtils;
 	private final CustomUserDetailsService customUserDetailsService;
+	private final HttpServletRequest request;
 
 	@Override
 	public void register(AuthRequest request) {
@@ -68,9 +71,26 @@ public class AuthServiceImpl implements AuthService {
 		String accessToken = jwtUtils.generateAccessToken(userDetails);
 		String refreshToken = jwtUtils.generateRefreshToken(userDetails);
 
+		String sessionId = UUID.randomUUID().toString();
+
 		tokenRepository.saveAll(List.of(
-			Token.builder().token(accessToken).user(user).expired(false).revoked(false).refreshToken(false).build(),
-			Token.builder().token(refreshToken).user(user).expired(false).revoked(false).refreshToken(true).build()
+			Token.builder()
+				.token(accessToken)
+				.user(user)
+				.expired(false)
+				.revoked(false)
+				.refreshToken(false)
+				.sessionId(sessionId)
+				.build(),
+
+			Token.builder()
+				.token(refreshToken)
+				.user(user)
+				.expired(false)
+				.revoked(false)
+				.refreshToken(true)
+				.sessionId(sessionId)
+				.build()
 		));
 
 		cleanUpTokens(user);
@@ -137,17 +157,23 @@ public class AuthServiceImpl implements AuthService {
 		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
-		List<Token> validTokens = tokenRepository.findAllValidTokensByUser(user.getId());
-		if (!validTokens.isEmpty()) {
-			validTokens.forEach(token -> {
-				token.setRevoked(true);
-				token.setExpired(true);
-			});
-			tokenRepository.saveAll(validTokens);
-		}
+		String token = getCurrentToken();
+		Token storedToken = tokenRepository.findByToken(token)
+			.orElseThrow(() -> new RuntimeException("Token not found"));
+
+
+		String sessionId = storedToken.getSessionId();
+		List<Token> tokensFromSession = tokenRepository.findAllByUserAndSessionId(user.getId(), sessionId);
+
+		tokensFromSession.forEach(t -> {
+			t.setRevoked(true);
+			t.setExpired(true);
+		});
+		tokenRepository.saveAll(tokensFromSession);
 
 		cleanUpTokens(user);
 	}
+
 
 	/**
 	 * Delete 'dead' tokens it's -> (expired/revoked) or 6 max active tokens.
@@ -173,5 +199,13 @@ public class AuthServiceImpl implements AuthService {
 		if (!toRemove.isEmpty()) {
 			tokenRepository.deleteAll(toRemove);
 		}
+	}
+
+	private String getCurrentToken() {
+		String authHeader = request.getHeader("Authorization");
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			return authHeader.substring(7);
+		}
+		throw new RuntimeException("Authorization header is missing or invalid");
 	}
 }
