@@ -33,6 +33,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/auth/**").permitAll()
+				.requestMatchers("/auth/refresh").permitAll()
 
 				.requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")

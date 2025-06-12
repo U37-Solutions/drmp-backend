@@ -10,6 +10,7 @@ import org.ua.drmp.dto.ChangePasswordRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
 import org.ua.drmp.entity.User;
+import org.ua.drmp.repo.TokenRepository;
 import org.ua.drmp.repo.UserRepository;
 import org.ua.drmp.service.UserService;
 
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final TokenRepository tokenRepository;
 
 	@Override
 	public void changePassword(ChangePasswordRequest changePasswordRequest) {
@@ -78,6 +80,7 @@ public class UserServiceImpl implements UserService {
 		if (!userRepository.existsById(id)) {
 			throw new RuntimeException("User not found");
 		}
+		tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(id));
 		userRepository.deleteById(id);
 	}
 

@@ -8,5 +8,5 @@ public interface AuthService {
 	Map<String, String> login(AuthRequest request);
 
 	Map<String, String> refreshToken(String refreshToken);
-	void logout(Long userId);
+	void logout();
 }

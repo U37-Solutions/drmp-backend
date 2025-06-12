@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.ua.drmp.dto.AuthRequest;
 import org.ua.drmp.dto.RefreshRequest;
@@ -31,8 +30,8 @@ public class AuthController {
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<String> logout(@RequestParam Long userId) {
-		authService.logout(userId);
+	public ResponseEntity<String> logout() {
+		authService.logout();
 		return ResponseEntity.ok("Logged out successfully");
 	}
 
