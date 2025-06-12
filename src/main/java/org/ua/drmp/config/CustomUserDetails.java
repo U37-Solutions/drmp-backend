@@ -17,7 +17,8 @@ public class CustomUserDetails implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return user.getRoles().stream()
-			.map(role -> new CustomGrantedAuthority(role.getName().name()))
+			// add prefix ROLE_ because spring security expected that
+			.map(role -> new CustomGrantedAuthority("ROLE_" + role.getName().name()))
 			.collect(Collectors.toSet());
 	}
 

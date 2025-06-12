@@ -1,14 +1,22 @@
 package org.ua.drmp.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import org.ua.drmp.config.CustomUserDetails;
 import org.ua.drmp.config.CustomUserDetailsService;
 import org.ua.drmp.config.JwtUtils;
@@ -25,6 +33,7 @@ import org.ua.drmp.service.AuthService;
 @RequiredArgsConstructor
 @Service
 public class AuthServiceImpl implements AuthService {
+
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
 	private final TokenRepository tokenRepository;
@@ -32,6 +41,8 @@ public class AuthServiceImpl implements AuthService {
 	private final AuthenticationManager authManager;
 	private final JwtUtils jwtUtils;
 	private final CustomUserDetailsService customUserDetailsService;
+	private final HttpServletRequest request;
+
 	@Override
 	public void register(AuthRequest request) {
 		if (userRepository.existsByEmail(request.email())) {
@@ -57,19 +68,41 @@ public class AuthServiceImpl implements AuthService {
 		CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
 		User user = userDetails.getUser();
 
-		logout(user.getId());
-
 		String accessToken = jwtUtils.generateAccessToken(userDetails);
 		String refreshToken = jwtUtils.generateRefreshToken(userDetails);
 
+		String sessionId = UUID.randomUUID().toString();
+
 		tokenRepository.saveAll(List.of(
-			Token.builder().token(accessToken).user(user).expired(false).revoked(false).refreshToken(false).build(),
-			Token.builder().token(refreshToken).user(user).expired(false).revoked(false).refreshToken(true).build()
+			Token.builder()
+				.token(accessToken)
+				.user(user)
+				.expired(false)
+				.revoked(false)
+				.refreshToken(false)
+				.sessionId(sessionId)
+				.build(),
+
+			Token.builder()
+				.token(refreshToken)
+				.user(user)
+				.expired(false)
+				.revoked(false)
+				.refreshToken(true)
+				.sessionId(sessionId)
+				.build()
 		));
+
+		cleanUpTokens(user);
+
+		Date accessTokenExpiry = jwtUtils.getExpirationDateFromToken(accessToken);
+		Date refreshTokenExpiry = jwtUtils.getExpirationDateFromToken(refreshToken);
 
 		return Map.of(
 			"accessToken", accessToken,
-			"refreshToken", refreshToken
+			"accessTokenExpiresAt", accessTokenExpiry.toString(),
+			"refreshToken", refreshToken,
+			"refreshTokenExpiresAt", refreshTokenExpiry.toString()
 		);
 	}
 
@@ -91,7 +124,6 @@ public class AuthServiceImpl implements AuthService {
 			throw new RuntimeException("Refresh token is not valid");
 		}
 
-		// Деактивуємо всі активні access токени (не refresh) цього користувача
 		List<Token> validAccessTokens = tokenRepository.findAllValidAccessTokensByUser(user.getId());
 		if (!validAccessTokens.isEmpty()) {
 			validAccessTokens.forEach(token -> {
@@ -101,10 +133,8 @@ public class AuthServiceImpl implements AuthService {
 			tokenRepository.saveAll(validAccessTokens);
 		}
 
-		// Генеруємо новий access токен
 		String newAccessToken = jwtUtils.generateAccessToken(userDetails);
 
-		// Зберігаємо новий access токен
 		tokenRepository.save(Token.builder()
 			.token(newAccessToken)
 			.user(user)
@@ -113,19 +143,69 @@ public class AuthServiceImpl implements AuthService {
 			.refreshToken(false)
 			.build());
 
-		return Map.of("accessToken", newAccessToken);
+		cleanUpTokens(user);
+
+		Date accessTokenExpiry = jwtUtils.getExpirationDateFromToken(newAccessToken);
+
+		return Map.of("accessToken", newAccessToken,
+			"accessTokenExpiresAt", accessTokenExpiry.toString());
+	}
+
+	@Override
+	public void logout() {
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new RuntimeException("User not found"));
+
+		String token = getCurrentToken();
+		Token storedToken = tokenRepository.findByToken(token)
+			.orElseThrow(() -> new RuntimeException("Token not found"));
+
+
+		String sessionId = storedToken.getSessionId();
+		List<Token> tokensFromSession = tokenRepository.findAllByUserAndSessionId(user.getId(), sessionId);
+
+		tokensFromSession.forEach(t -> {
+			t.setRevoked(true);
+			t.setExpired(true);
+		});
+		tokenRepository.saveAll(tokensFromSession);
+
+		cleanUpTokens(user);
 	}
 
 
-	@Override
-	public void logout(Long userId) {
-		List<Token> validTokens = tokenRepository.findAllValidTokensByUser(userId);
-		if (!validTokens.isEmpty()) {
-			validTokens.forEach(token -> {
-				token.setRevoked(true);
-				token.setExpired(true);
-			});
-			tokenRepository.saveAll(validTokens);
+	/**
+	 * Delete 'dead' tokens it's -> (expired/revoked) or 6 max active tokens.
+	 */
+	private void cleanUpTokens(User user) {
+		List<Token> allTokens = tokenRepository.findAllByUserOrderByIdAsc(user.getId());
+
+		List<Token> toRemove = allTokens.stream()
+			.filter(token -> token.isExpired() || token.isRevoked())
+			.toList();
+
+		List<Token> activeTokens = allTokens.stream()
+			.filter(token -> !token.isExpired() && !token.isRevoked())
+			.toList();
+
+		if (activeTokens.size() > 6) {
+			int excess = activeTokens.size() - 6;
+			List<Token> excessTokens = activeTokens.stream().limit(excess).toList();
+			toRemove = new ArrayList<>(toRemove);
+			toRemove.addAll(excessTokens);
 		}
+
+		if (!toRemove.isEmpty()) {
+			tokenRepository.deleteAll(toRemove);
+		}
+	}
+
+	private String getCurrentToken() {
+		String authHeader = request.getHeader("Authorization");
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			return authHeader.substring(7);
+		}
+		throw new RuntimeException("Authorization header is missing or invalid");
 	}
 }

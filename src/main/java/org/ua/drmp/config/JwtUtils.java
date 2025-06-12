@@ -1,5 +1,6 @@
 package org.ua.drmp.config;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -54,6 +55,16 @@ public class JwtUtils {
 		} catch (JwtException | IllegalArgumentException e) {
 			return false;
 		}
+	}
+
+	public Date getExpirationDateFromToken(String token) {
+		Claims claims = Jwts
+			.parserBuilder()
+			.setSigningKey(getSignKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody();
+		return claims.getExpiration();
 	}
 
 	private Key getSignKey() {
