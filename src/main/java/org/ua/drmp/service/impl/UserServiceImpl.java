@@ -1,6 +1,5 @@
 package org.ua.drmp.service.impl;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,6 +9,9 @@ import org.ua.drmp.dto.ChangePasswordRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
 import org.ua.drmp.entity.User;
+import org.ua.drmp.exception.ForbiddenOperationException;
+import org.ua.drmp.exception.InvalidPasswordException;
+import org.ua.drmp.exception.UserNotFoundException;
 import org.ua.drmp.repo.TokenRepository;
 import org.ua.drmp.repo.UserRepository;
 import org.ua.drmp.service.UserService;
@@ -26,10 +28,10 @@ public class UserServiceImpl implements UserService {
 	public void changePassword(ChangePasswordRequest changePasswordRequest) {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
 
 		if (!passwordEncoder.matches(changePasswordRequest.oldPassword(), user.getPassword())) {
-			throw new RuntimeException("Old password is incorrect");
+			throw new InvalidPasswordException("Old password is incorrect");
 		}
 
 		user.setPassword(passwordEncoder.encode(changePasswordRequest.newPassword()));
@@ -44,20 +46,17 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserResponse fetchUserById(Long id) {
 		return mapToResponse(userRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("User not found")));
+			.orElseThrow(() -> new UserNotFoundException("User not found")));
 	}
 
 	@Override
 	public void updateUser(Long id, UserRequest request) {
 		User user = userRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
 
-		try {
-			String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-			if (!user.getEmail().equals(currentEmail)) {
-				throw new AccessDeniedException("You are not allowed to update this user");
-			}
-		} catch (AccessDeniedException ignored) {
+		String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		if (!user.getEmail().equals(currentEmail)) {
+			throw new ForbiddenOperationException("You are not allowed to update this user");
 		}
 
 		if (request.email() != null) {
@@ -78,7 +77,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void deleteUserById(Long id) {
 		if (!userRepository.existsById(id)) {
-			throw new RuntimeException("User not found");
+			throw new UserNotFoundException("User not found");
 		}
 		tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(id));
 		userRepository.deleteById(id);
@@ -88,7 +87,7 @@ public class UserServiceImpl implements UserService {
 	public User sessionInfo() {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		return userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
 	}
 
 	private UserResponse mapToResponse(User user) {

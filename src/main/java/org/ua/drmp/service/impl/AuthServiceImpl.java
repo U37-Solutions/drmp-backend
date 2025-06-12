@@ -25,6 +25,11 @@ import org.ua.drmp.entity.DRMPRole;
 import org.ua.drmp.entity.Role;
 import org.ua.drmp.entity.Token;
 import org.ua.drmp.entity.User;
+import org.ua.drmp.exception.AuthorizationHeaderMissingException;
+import org.ua.drmp.exception.BadRequestException;
+import org.ua.drmp.exception.EmailAlreadyInUseException;
+import org.ua.drmp.exception.ResourceNotFoundException;
+import org.ua.drmp.exception.TokenValidationException;
 import org.ua.drmp.repo.RoleRepository;
 import org.ua.drmp.repo.TokenRepository;
 import org.ua.drmp.repo.UserRepository;
@@ -46,11 +51,11 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public void register(AuthRequest request) {
 		if (userRepository.existsByEmail(request.email())) {
-			throw new RuntimeException("Email already in use");
+			throw new EmailAlreadyInUseException("Email already in use");
 		}
 
 		Role role = roleRepository.findByName(DRMPRole.USER)
-			.orElseThrow(() -> new RuntimeException("Default role not found"));
+			.orElseThrow(() -> new ResourceNotFoundException("Default role not found"));
 
 		User user = User.builder()
 			.email(request.email())
@@ -63,65 +68,70 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public Map<String, String> login(AuthRequest request) {
-		Authentication auth = authManager.authenticate(
-			new UsernamePasswordAuthenticationToken(request.email(), request.password()));
-		CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-		User user = userDetails.getUser();
+		try {
+			Authentication auth = authManager.authenticate(
+				new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-		String accessToken = jwtUtils.generateAccessToken(userDetails);
-		String refreshToken = jwtUtils.generateRefreshToken(userDetails);
+			CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+			User user = userDetails.getUser();
 
-		String sessionId = UUID.randomUUID().toString();
+			String accessToken = jwtUtils.generateAccessToken(userDetails);
+			String refreshToken = jwtUtils.generateRefreshToken(userDetails);
+			String sessionId = UUID.randomUUID().toString();
 
-		tokenRepository.saveAll(List.of(
-			Token.builder()
-				.token(accessToken)
-				.user(user)
-				.expired(false)
-				.revoked(false)
-				.refreshToken(false)
-				.sessionId(sessionId)
-				.build(),
+			tokenRepository.saveAll(List.of(
+				Token.builder()
+					.token(accessToken)
+					.user(user)
+					.expired(false)
+					.revoked(false)
+					.refreshToken(false)
+					.sessionId(sessionId)
+					.build(),
 
-			Token.builder()
-				.token(refreshToken)
-				.user(user)
-				.expired(false)
-				.revoked(false)
-				.refreshToken(true)
-				.sessionId(sessionId)
-				.build()
-		));
+				Token.builder()
+					.token(refreshToken)
+					.user(user)
+					.expired(false)
+					.revoked(false)
+					.refreshToken(true)
+					.sessionId(sessionId)
+					.build()
+			));
 
-		cleanUpTokens(user);
+			cleanUpTokens(user);
 
-		Date accessTokenExpiry = jwtUtils.getExpirationDateFromToken(accessToken);
-		Date refreshTokenExpiry = jwtUtils.getExpirationDateFromToken(refreshToken);
+			Date accessTokenExpiry = jwtUtils.getExpirationDateFromToken(accessToken);
+			Date refreshTokenExpiry = jwtUtils.getExpirationDateFromToken(refreshToken);
 
-		return Map.of(
-			"accessToken", accessToken,
-			"accessTokenExpiresAt", accessTokenExpiry.toString(),
-			"refreshToken", refreshToken,
-			"refreshTokenExpiresAt", refreshTokenExpiry.toString()
-		);
+			return Map.of(
+				"accessToken", accessToken,
+				"accessTokenExpiresAt", accessTokenExpiry.toString(),
+				"refreshToken", refreshToken,
+				"refreshTokenExpiresAt", refreshTokenExpiry.toString()
+			);
+		} catch (Exception e) {
+			throw new BadRequestException("Login failed");
+		}
 	}
 
 	@Override
 	public Map<String, String> refreshToken(String refreshToken) {
 		if (!jwtUtils.validateJwtToken(refreshToken)) {
-			throw new RuntimeException("Invalid refresh token");
+			throw new TokenValidationException("Invalid refresh token");
 		}
 
-		String email = jwtUtils.getEmailFromJwtToken(refreshToken);
+		String email = jwtUtils.tryGetEmail(refreshToken)
+			.orElseThrow(() -> new TokenValidationException("Email not found in token"));
 
 		CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(email);
 		User user = userDetails.getUser();
 
 		Token storedRefreshToken = tokenRepository.findByToken(refreshToken)
-			.orElseThrow(() -> new RuntimeException("Refresh token not found"));
+			.orElseThrow(() -> new ResourceNotFoundException("Refresh token not found"));
 
 		if (storedRefreshToken.isExpired() || storedRefreshToken.isRevoked() || !storedRefreshToken.isRefreshToken()) {
-			throw new RuntimeException("Refresh token is not valid");
+			throw new TokenValidationException("Refresh token is not valid");
 		}
 
 		List<Token> validAccessTokens = tokenRepository.findAllValidAccessTokensByUser(user.getId());
@@ -147,20 +157,22 @@ public class AuthServiceImpl implements AuthService {
 
 		Date accessTokenExpiry = jwtUtils.getExpirationDateFromToken(newAccessToken);
 
-		return Map.of("accessToken", newAccessToken,
-			"accessTokenExpiresAt", accessTokenExpiry.toString());
+		return Map.of(
+			"accessToken", newAccessToken,
+			"accessTokenExpiresAt", accessTokenExpiry.toString()
+		);
 	}
+
 
 	@Override
 	public void logout() {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
 		String token = getCurrentToken();
 		Token storedToken = tokenRepository.findByToken(token)
-			.orElseThrow(() -> new RuntimeException("Token not found"));
-
+			.orElseThrow(() -> new ResourceNotFoundException("Token not found"));
 
 		String sessionId = storedToken.getSessionId();
 		List<Token> tokensFromSession = tokenRepository.findAllByUserAndSessionId(user.getId(), sessionId);
@@ -173,6 +185,7 @@ public class AuthServiceImpl implements AuthService {
 
 		cleanUpTokens(user);
 	}
+
 
 
 	/**
@@ -206,6 +219,6 @@ public class AuthServiceImpl implements AuthService {
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			return authHeader.substring(7);
 		}
-		throw new RuntimeException("Authorization header is missing or invalid");
+		throw new AuthorizationHeaderMissingException("Authorization header is missing or invalid");
 	}
 }
