@@ -2,7 +2,7 @@ name: Push develop and Deploy
  
 on:
   push:
-    branches: ["build/add-dockerfile"]
+    branches: ["develop"]
 
 env:
   NAMESPACE: drmp
