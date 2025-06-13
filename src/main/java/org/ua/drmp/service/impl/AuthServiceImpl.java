@@ -30,6 +30,7 @@ import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.exception.EmailAlreadyInUseException;
 import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.exception.TokenValidationException;
+import org.ua.drmp.exception.UserNotFoundException;
 import org.ua.drmp.repo.RoleRepository;
 import org.ua.drmp.repo.TokenRepository;
 import org.ua.drmp.repo.UserRepository;
@@ -168,7 +169,7 @@ public class AuthServiceImpl implements AuthService {
 	public void logout() {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
 
 		String token = getCurrentToken();
 		Token storedToken = tokenRepository.findByToken(token)
