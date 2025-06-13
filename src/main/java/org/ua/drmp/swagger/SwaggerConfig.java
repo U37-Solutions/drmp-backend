@@ -1,4 +1,4 @@
-package org.ua.drmp.config;
+package org.ua.drmp.swagger;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
