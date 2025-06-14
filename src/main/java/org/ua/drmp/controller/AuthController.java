@@ -8,8 +8,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.ua.drmp.dto.AuthRequest;
+import org.ua.drmp.dto.ForgotPasswordRequest;
 import org.ua.drmp.dto.RefreshRequest;
+import org.ua.drmp.dto.ResetPasswordRequest;
 import org.ua.drmp.service.AuthService;
+import org.ua.drmp.service.EmailService;
+import org.ua.drmp.service.PasswordResetTokenService;
+import org.ua.drmp.service.UserService;
 import org.ua.drmp.swagger.annotation.ApiError400;
 import org.ua.drmp.swagger.annotation.ApiError401;
 import org.ua.drmp.swagger.annotation.ApiError404;
@@ -21,6 +26,10 @@ import org.ua.drmp.swagger.annotation.ApiError409;
 public class AuthController {
 
 	private final AuthService authService;
+
+	private final EmailService emailService;
+	private final PasswordResetTokenService tokenService;
+	private final UserService userService;
 
 	@ApiError401
 	@ApiError404
@@ -54,4 +63,25 @@ public class AuthController {
 		return ResponseEntity.ok(authService.refreshToken(request.refreshToken()));
 	}
 
+	@PostMapping("/forgot-password")
+	public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+		String email = request.email();
+
+		// it's only for validation, in future (after we will add validation, remove that)
+		userService.fetchByEmail(email);
+
+		String token = tokenService.createResetToken(email);
+		emailService.sendResetPasswordEmail(email, token);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/reset-password")
+	public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+		String token = request.token();
+
+		String email = tokenService.getEmailByResetToken(token);
+		userService.resetPassword(email, request.password());
+		tokenService.invalidateResetToken(token);
+		return ResponseEntity.ok().build();
+	}
 }

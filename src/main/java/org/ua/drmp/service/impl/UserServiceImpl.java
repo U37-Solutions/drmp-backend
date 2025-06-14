@@ -1,6 +1,7 @@
 package org.ua.drmp.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,8 +40,21 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void resetPassword(String email, String newPassword) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+	}
+
+	@Override
 	public List<UserResponse> fetchUsers() {
 		return userRepository.findAll().stream().map(this::mapToResponse).toList();
+	}
+
+	@Override
+	public User fetchByEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
 	}
 
 	@Override

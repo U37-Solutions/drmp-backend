@@ -3,6 +3,20 @@ spring:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: work.voroshchuk.mail@gmail.com
+    password: ttsw wygx mbaa wnfv
+    properties:
+      mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+              required: true
+            ssl:
+              trust: smtp.gmail.com
 
   jpa:
     hibernate:
@@ -21,3 +35,7 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  base-url: https://admin-drmp.u37solutions.com/
+  # now it's dev link
