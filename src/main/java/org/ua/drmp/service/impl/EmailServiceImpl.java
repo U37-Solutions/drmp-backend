@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.service.EmailService;
 
 @Service
@@ -46,7 +47,7 @@ public class EmailServiceImpl implements EmailService {
 			helper.setFrom(senderEmail);
 			mailSender.send(mimeMessage);
 		} catch (MessagingException e) {
-			throw new RuntimeException("Failed to send email", e);
+			throw new BadRequestException("Failed to send email");
 		}
 	}
 }

@@ -63,6 +63,8 @@ public class AuthController {
 		return ResponseEntity.ok(authService.refreshToken(request.refreshToken()));
 	}
 
+	@ApiError400
+	@ApiError404
 	@PostMapping("/forgot-password")
 	public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
 		String email = request.email();
@@ -75,6 +77,8 @@ public class AuthController {
 		return ResponseEntity.ok().build();
 	}
 
+	@ApiError401
+	@ApiError404
 	@PostMapping("/reset-password")
 	public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
 		String token = request.token();
