@@ -82,6 +82,7 @@ public class SecurityConfig {
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		// if in future I will set tokens in header, will need
 		// configuration.setExposedHeaders(List.of("Authorization"));
+
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
