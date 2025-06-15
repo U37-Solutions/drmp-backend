@@ -75,12 +75,14 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(List.of("https://admin-drmp.u37solutions.com"));
+		// TODO: before release please remove incorrect urls
+		configuration.setAllowedOrigins(
+			List.of("http://localhost:5173", "http://localhost:8080", "https://admin-drmp.u37solutions.com", "https://api-drmp.u37solutions.com"));
 
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		// if in future I will set tokens in header, will need
 		// configuration.setExposedHeaders(List.of("Authorization"));
-		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
 
