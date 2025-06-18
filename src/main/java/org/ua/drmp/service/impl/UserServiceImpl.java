@@ -1,20 +1,30 @@
 package org.ua.drmp.service.impl;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ua.drmp.dto.ChangePasswordRequest;
+import org.ua.drmp.dto.ConfirmRegistrationRequest;
+import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
+import org.ua.drmp.entity.DRMPRole;
+import org.ua.drmp.entity.Role;
 import org.ua.drmp.entity.User;
+import org.ua.drmp.exception.BadRequestException;
+import org.ua.drmp.exception.EmailAlreadyInUseException;
 import org.ua.drmp.exception.ForbiddenOperationException;
 import org.ua.drmp.exception.InvalidPasswordException;
+import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.exception.UserNotFoundException;
+import org.ua.drmp.repo.RoleRepository;
 import org.ua.drmp.repo.TokenRepository;
 import org.ua.drmp.repo.UserRepository;
+import org.ua.drmp.service.EmailService;
+import org.ua.drmp.service.InviteTokenService;
 import org.ua.drmp.service.UserService;
 
 @Service
@@ -22,8 +32,11 @@ import org.ua.drmp.service.UserService;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final TokenRepository tokenRepository;
+	private final EmailService emailService;
+	private final InviteTokenService inviteTokenService;
 
 	@Override
 	public void changePassword(ChangePasswordRequest changePasswordRequest) {
@@ -102,6 +115,57 @@ public class UserServiceImpl implements UserService {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		return userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
+	}
+
+	@Override
+	public void inviteUser(InviteUserRequest request) {
+		if (userRepository.existsByEmail(request.email())) {
+			throw new BadRequestException("Користувач вже існує");
+		}
+
+		String token = inviteTokenService.createInviteToken(request);
+		emailService.sendInviteUserEmail(request.email(), token);
+	}
+
+	@Override
+	public InviteUserRequest getTemporaryUserData(String token) {
+		InviteUserRequest request = inviteTokenService.getUserDataByToken(token);
+
+		return new InviteUserRequest(
+			request.email(),
+			request.role(),
+			request.firstName(),
+			request.lastName()
+		);
+	}
+
+	@Override
+	public void confirmRegistration(ConfirmRegistrationRequest request) {
+		InviteUserRequest inviteData = inviteTokenService.getUserDataByToken(request.token());
+
+		//TODO: in future check that this needed
+		if (userRepository.existsByEmail(inviteData.email())) {
+			throw new EmailAlreadyInUseException("Користувач з цим email вже існує");
+		}
+
+		Role role = roleRepository.findByName(DRMPRole.valueOf(inviteData.role()))
+			.orElseThrow(() -> new ResourceNotFoundException("Роль не знайдена"));
+
+		User user = new User();
+		user.setEmail(inviteData.email());
+		user.setFirstName(
+			request.firstName() != null ? request.firstName() : inviteData.firstName()
+		);
+		user.setLastName(
+			request.lastName() != null ? request.lastName() : inviteData.lastName()
+		);
+		user.setPassword(passwordEncoder.encode(request.password()));
+		user.setRoles(Set.of(role));
+
+		userRepository.save(user);
+		inviteTokenService.invalidateInviteToken(request.token());
+
+		emailService.sendSuccessfulRegistrationEmail(user.getEmail());
 	}
 
 	private UserResponse mapToResponse(User user) {

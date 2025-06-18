@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.ua.drmp.dto.ChangePasswordRequest;
+import org.ua.drmp.dto.ConfirmRegistrationRequest;
+import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
 import org.ua.drmp.entity.User;
@@ -66,5 +68,22 @@ public class UserController {
 	@GetMapping("/session-info")
 	public User fetchUserInfo() {
 		return userService.sessionInfo();
+	}
+
+	@PostMapping("/invite")
+	public ResponseEntity<?> inviteUser(@RequestBody InviteUserRequest request) {
+		userService.inviteUser(request);
+		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/temporary/{token}")
+	public ResponseEntity<InviteUserRequest> getTempUser(@PathVariable String token) {
+		return ResponseEntity.ok(userService.getTemporaryUserData(token));
+	}
+
+	@PostMapping("/confirm-registration")
+	public ResponseEntity<?> confirmRegistration(@RequestBody ConfirmRegistrationRequest request) {
+		userService.confirmRegistration(request);
+		return ResponseEntity.ok().build();
 	}
 }

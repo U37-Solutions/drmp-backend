@@ -57,7 +57,6 @@ public class AuthController {
 	}
 
 	@ApiError401
-	@ApiError404
 	@PostMapping("/refresh")
 	public ResponseEntity<Map<String, String>> refresh(@RequestBody RefreshRequest request) {
 		return ResponseEntity.ok(authService.refreshToken(request.refreshToken()));

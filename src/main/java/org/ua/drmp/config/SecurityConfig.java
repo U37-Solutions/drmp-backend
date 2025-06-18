@@ -49,6 +49,8 @@ public class SecurityConfig {
 				.requestMatchers(SWAGGER_WHITELIST).permitAll()
 				.requestMatchers("/auth/**").permitAll()
 				.requestMatchers("/auth/refresh").permitAll()
+				.requestMatchers("/temporary/**").permitAll()
+				.requestMatchers("/confirm-registration").permitAll()
 
 				.requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
@@ -77,7 +79,7 @@ public class SecurityConfig {
 
 		// TODO: before release please remove incorrect urls
 		configuration.setAllowedOrigins(
-			List.of("http://localhost:5173", "http://localhost:8080", "https://admin-drmp.u37solutions.com", "https://api-drmp.u37solutions.com"));
+			List.of("*"));
 
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		// if in future I will set tokens in header, will need
