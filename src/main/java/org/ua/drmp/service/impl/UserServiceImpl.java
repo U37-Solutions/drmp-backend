@@ -15,7 +15,6 @@ import org.ua.drmp.entity.DRMPRole;
 import org.ua.drmp.entity.Role;
 import org.ua.drmp.entity.User;
 import org.ua.drmp.exception.BadRequestException;
-import org.ua.drmp.exception.EmailAlreadyInUseException;
 import org.ua.drmp.exception.ForbiddenOperationException;
 import org.ua.drmp.exception.InvalidPasswordException;
 import org.ua.drmp.exception.ResourceNotFoundException;
@@ -142,11 +141,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void confirmRegistration(ConfirmRegistrationRequest request) {
 		InviteUserRequest inviteData = inviteTokenService.getUserDataByToken(request.token());
-
-		//TODO: in future check that this needed
-		if (userRepository.existsByEmail(inviteData.email())) {
-			throw new EmailAlreadyInUseException("Користувач з цим email вже існує");
-		}
 
 		Role role = roleRepository.findByName(DRMPRole.valueOf(inviteData.role()))
 			.orElseThrow(() -> new ResourceNotFoundException("Роль не знайдена"));

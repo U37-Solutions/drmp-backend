@@ -19,6 +19,7 @@ import org.ua.drmp.dto.UserResponse;
 import org.ua.drmp.entity.User;
 import org.ua.drmp.service.UserService;
 import org.ua.drmp.swagger.annotation.ApiError400;
+import org.ua.drmp.swagger.annotation.ApiError401;
 import org.ua.drmp.swagger.annotation.ApiError403;
 import org.ua.drmp.swagger.annotation.ApiError404;
 
@@ -70,17 +71,23 @@ public class UserController {
 		return userService.sessionInfo();
 	}
 
+	@ApiError400
 	@PostMapping("/invite")
 	public ResponseEntity<?> inviteUser(@RequestBody InviteUserRequest request) {
 		userService.inviteUser(request);
 		return ResponseEntity.ok().build();
 	}
 
+	@ApiError400
+	@ApiError401
 	@GetMapping("/temporary/{token}")
 	public ResponseEntity<InviteUserRequest> getTempUser(@PathVariable String token) {
 		return ResponseEntity.ok(userService.getTemporaryUserData(token));
 	}
 
+	@ApiError400
+	@ApiError401
+	@ApiError404
 	@PostMapping("/confirm-registration")
 	public ResponseEntity<?> confirmRegistration(@RequestBody ConfirmRegistrationRequest request) {
 		userService.confirmRegistration(request);

@@ -47,7 +47,6 @@ public class AuthController {
 		return ResponseEntity.ok(authService.login(request));
 	}
 
-	@ApiError400
 	@ApiError401
 	@ApiError404
 	@PostMapping("/logout")
