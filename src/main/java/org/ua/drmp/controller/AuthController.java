@@ -47,7 +47,6 @@ public class AuthController {
 		return ResponseEntity.ok(authService.login(request));
 	}
 
-	@ApiError400
 	@ApiError401
 	@ApiError404
 	@PostMapping("/logout")
@@ -57,7 +56,6 @@ public class AuthController {
 	}
 
 	@ApiError401
-	@ApiError404
 	@PostMapping("/refresh")
 	public ResponseEntity<Map<String, String>> refresh(@RequestBody RefreshRequest request) {
 		return ResponseEntity.ok(authService.refreshToken(request.refreshToken()));

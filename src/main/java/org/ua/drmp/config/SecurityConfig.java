@@ -49,6 +49,8 @@ public class SecurityConfig {
 				.requestMatchers(SWAGGER_WHITELIST).permitAll()
 				.requestMatchers("/auth/**").permitAll()
 				.requestMatchers("/auth/refresh").permitAll()
+				.requestMatchers("/temporary/**").permitAll()
+				.requestMatchers("/confirm-registration").permitAll()
 
 				.requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")

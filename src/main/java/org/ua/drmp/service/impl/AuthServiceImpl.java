@@ -6,17 +6,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import org.ua.drmp.config.CustomUserDetails;
 import org.ua.drmp.config.CustomUserDetailsService;
 import org.ua.drmp.config.JwtUtils;
@@ -25,9 +22,9 @@ import org.ua.drmp.entity.DRMPRole;
 import org.ua.drmp.entity.Role;
 import org.ua.drmp.entity.Token;
 import org.ua.drmp.entity.User;
-import org.ua.drmp.exception.AuthorizationHeaderMissingException;
 import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.exception.EmailAlreadyInUseException;
+import org.ua.drmp.exception.ForbiddenOperationException;
 import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.exception.TokenValidationException;
 import org.ua.drmp.exception.UserNotFoundException;
@@ -129,7 +126,7 @@ public class AuthServiceImpl implements AuthService {
 		User user = userDetails.getUser();
 
 		Token storedRefreshToken = tokenRepository.findByToken(refreshToken)
-			.orElseThrow(() -> new ResourceNotFoundException("Refresh token not found"));
+			.orElseThrow(() -> new TokenValidationException("Refresh token not found"));
 
 		if (storedRefreshToken.isExpired() || storedRefreshToken.isRevoked() || !storedRefreshToken.isRefreshToken()) {
 			throw new TokenValidationException("Refresh token is not valid");
@@ -173,7 +170,7 @@ public class AuthServiceImpl implements AuthService {
 
 		String token = getCurrentToken();
 		Token storedToken = tokenRepository.findByToken(token)
-			.orElseThrow(() -> new ResourceNotFoundException("Token not found"));
+			.orElseThrow(() -> new TokenValidationException("Token not found"));
 
 		String sessionId = storedToken.getSessionId();
 		List<Token> tokensFromSession = tokenRepository.findAllByUserAndSessionId(user.getId(), sessionId);
@@ -186,8 +183,6 @@ public class AuthServiceImpl implements AuthService {
 
 		cleanUpTokens(user);
 	}
-
-
 
 	/**
 	 * Delete 'dead' tokens it's -> (expired/revoked) or 6 max active tokens.
@@ -220,6 +215,6 @@ public class AuthServiceImpl implements AuthService {
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			return authHeader.substring(7);
 		}
-		throw new AuthorizationHeaderMissingException("Authorization header is missing or invalid");
+		throw new ForbiddenOperationException("Authorization header is missing or invalid");
 	}
 }

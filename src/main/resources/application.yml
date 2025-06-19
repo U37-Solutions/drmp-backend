@@ -37,5 +37,5 @@ springdoc:
     path: /swagger-ui.html
 
 app:
-  base-url: https://admin-drmp.u37solutions.com/
+  base-url: https://admin-drmp.u37solutions.com
   # now it's dev link
