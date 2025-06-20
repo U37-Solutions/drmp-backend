@@ -26,8 +26,6 @@ public class Token {
 
 	private String token;
 
-	private boolean revoked;
-
 	private boolean expired;
 
 	private boolean refreshToken;
