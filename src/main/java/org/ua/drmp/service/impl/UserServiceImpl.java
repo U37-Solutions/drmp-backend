@@ -11,6 +11,7 @@ import org.ua.drmp.dto.ConfirmRegistrationRequest;
 import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
+import org.ua.drmp.dto.UserSessionResponse;
 import org.ua.drmp.entity.DRMPRole;
 import org.ua.drmp.entity.Role;
 import org.ua.drmp.entity.User;
@@ -110,16 +111,19 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User sessionInfo() {
+	public UserSessionResponse sessionInfo() {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
-		return userRepository.findByEmail(email)
+		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
+		return new UserSessionResponse(
+			user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getRoles().stream().findFirst().orElseThrow().getName()
+		);
 	}
 
 	@Override
 	public void inviteUser(InviteUserRequest request) {
 		if (userRepository.existsByEmail(request.email())) {
-			throw new BadRequestException("Користувач вже існує");
+			throw new BadRequestException("User with email " + request.email() + "already exist");
 		}
 
 		String token = inviteTokenService.createInviteToken(request);
@@ -143,7 +147,7 @@ public class UserServiceImpl implements UserService {
 		InviteUserRequest inviteData = inviteTokenService.getUserDataByToken(request.token());
 
 		Role role = roleRepository.findByName(DRMPRole.valueOf(inviteData.role()))
-			.orElseThrow(() -> new ResourceNotFoundException("Роль не знайдена"));
+			.orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
 		User user = new User();
 		user.setEmail(inviteData.email());

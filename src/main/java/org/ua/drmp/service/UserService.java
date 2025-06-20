@@ -6,6 +6,7 @@ import org.ua.drmp.dto.ConfirmRegistrationRequest;
 import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
+import org.ua.drmp.dto.UserSessionResponse;
 import org.ua.drmp.entity.User;
 
 public interface UserService {
@@ -23,7 +24,7 @@ public interface UserService {
 
 	void deleteUserById(Long id);
 
-	User sessionInfo();
+	UserSessionResponse sessionInfo();
 
 	void inviteUser(InviteUserRequest request);
 

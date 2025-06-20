@@ -16,7 +16,7 @@ import org.ua.drmp.dto.ConfirmRegistrationRequest;
 import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
-import org.ua.drmp.entity.User;
+import org.ua.drmp.dto.UserSessionResponse;
 import org.ua.drmp.service.UserService;
 import org.ua.drmp.swagger.annotation.ApiError400;
 import org.ua.drmp.swagger.annotation.ApiError401;
@@ -67,7 +67,7 @@ public class UserController {
 
 	@ApiError404
 	@GetMapping("/session-info")
-	public User fetchUserInfo() {
+	public UserSessionResponse fetchUserInfo() {
 		return userService.sessionInfo();
 	}
 

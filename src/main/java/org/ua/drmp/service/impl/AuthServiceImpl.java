@@ -82,7 +82,6 @@ public class AuthServiceImpl implements AuthService {
 					.token(accessToken)
 					.user(user)
 					.expired(false)
-					.revoked(false)
 					.refreshToken(false)
 					.sessionId(sessionId)
 					.build(),
@@ -91,7 +90,6 @@ public class AuthServiceImpl implements AuthService {
 					.token(refreshToken)
 					.user(user)
 					.expired(false)
-					.revoked(false)
 					.refreshToken(true)
 					.sessionId(sessionId)
 					.build()
@@ -128,16 +126,13 @@ public class AuthServiceImpl implements AuthService {
 		Token storedRefreshToken = tokenRepository.findByToken(refreshToken)
 			.orElseThrow(() -> new TokenValidationException("Refresh token not found"));
 
-		if (storedRefreshToken.isExpired() || storedRefreshToken.isRevoked() || !storedRefreshToken.isRefreshToken()) {
+		if (storedRefreshToken.isExpired() || !storedRefreshToken.isRefreshToken()) {
 			throw new TokenValidationException("Refresh token is not valid");
 		}
 
 		List<Token> validAccessTokens = tokenRepository.findAllValidAccessTokensByUser(user.getId());
 		if (!validAccessTokens.isEmpty()) {
-			validAccessTokens.forEach(token -> {
-				token.setRevoked(true);
-				token.setExpired(true);
-			});
+			validAccessTokens.forEach(token -> token.setExpired(true));
 			tokenRepository.saveAll(validAccessTokens);
 		}
 
@@ -147,7 +142,6 @@ public class AuthServiceImpl implements AuthService {
 			.token(newAccessToken)
 			.user(user)
 			.expired(false)
-			.revoked(false)
 			.refreshToken(false)
 			.build());
 
@@ -175,27 +169,24 @@ public class AuthServiceImpl implements AuthService {
 		String sessionId = storedToken.getSessionId();
 		List<Token> tokensFromSession = tokenRepository.findAllByUserAndSessionId(user.getId(), sessionId);
 
-		tokensFromSession.forEach(t -> {
-			t.setRevoked(true);
-			t.setExpired(true);
-		});
+		tokensFromSession.forEach(t -> t.setExpired(true));
 		tokenRepository.saveAll(tokensFromSession);
 
 		cleanUpTokens(user);
 	}
 
 	/**
-	 * Delete 'dead' tokens it's -> (expired/revoked) or 6 max active tokens.
+	 * Delete 'dead' tokens it's -> (expired) or 6 max active tokens.
 	 */
 	private void cleanUpTokens(User user) {
 		List<Token> allTokens = tokenRepository.findAllByUserOrderByIdAsc(user.getId());
 
 		List<Token> toRemove = allTokens.stream()
-			.filter(token -> token.isExpired() || token.isRevoked())
+			.filter(Token::isExpired)
 			.toList();
 
 		List<Token> activeTokens = allTokens.stream()
-			.filter(token -> !token.isExpired() && !token.isRevoked())
+			.filter(token -> !token.isExpired())
 			.toList();
 
 		if (activeTokens.size() > 6) {
