@@ -16,7 +16,7 @@ public class InviteTokenServiceImpl implements InviteTokenService {
 	private final Map<String, InviteUserRequest> tokenToUserDataMap = new ConcurrentHashMap<>();
 	private final Map<String, Long> tokenTimestamps = new ConcurrentHashMap<>();
 
-	private static final long EXPIRATION_MILLIS = 60 * 60 * 1000; // 1 година
+	private static final long EXPIRATION_MILLIS = 24 * 60 * 60 * 1000; // 1 день
 	@Override
 	public String createInviteToken(InviteUserRequest request) {
 		String token = UUID.randomUUID().toString();
