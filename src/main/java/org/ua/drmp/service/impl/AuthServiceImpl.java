@@ -1,12 +1,12 @@
 package org.ua.drmp.service.impl;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -180,27 +180,50 @@ public class AuthServiceImpl implements AuthService {
 	 */
 	private void cleanUpTokens(User user) {
 		List<Token> allTokens = tokenRepository.findAllByUserOrderByIdAsc(user.getId());
+		Date now = new Date();
+
+		// позначаємо як expired всі токени, які прострочені за датою
+		allTokens.forEach(token -> {
+			try {
+				Date tokenExpiry = jwtUtils.getExpirationDateFromToken(token.getToken());
+				if (tokenExpiry.before(now)) {
+					token.setExpired(true);
+				}
+			} catch (Exception ignored) {
+				token.setExpired(true);
+			}
+		});
+
+		tokenRepository.saveAll(allTokens);
 
 		List<Token> toRemove = allTokens.stream()
 			.filter(Token::isExpired)
-			.toList();
+			.collect(Collectors.toList());
 
 		List<Token> activeTokens = allTokens.stream()
 			.filter(token -> !token.isExpired())
 			.toList();
 
+		List<Token> activeRefreshTokens = activeTokens.stream()
+			.filter(Token::isRefreshToken)
+			.toList();
+
 		if (activeTokens.size() > 6) {
 			int excess = activeTokens.size() - 6;
 			List<Token> excessTokens = activeTokens.stream().limit(excess).toList();
-			toRemove = new ArrayList<>(toRemove);
 			toRemove.addAll(excessTokens);
+		}
+
+		if (activeRefreshTokens.size() > 3) {
+			int excess = activeRefreshTokens.size() - 3;
+			List<Token> excessRefreshTokens = activeRefreshTokens.stream().limit(excess).toList();
+			toRemove.addAll(excessRefreshTokens);
 		}
 
 		if (!toRemove.isEmpty()) {
 			tokenRepository.deleteAll(toRemove);
 		}
 	}
-
 	private String getCurrentToken() {
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
