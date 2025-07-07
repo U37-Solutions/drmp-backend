@@ -52,8 +52,14 @@ public class SecurityConfig {
 				.requestMatchers("/temporary/**").permitAll()
 				.requestMatchers("/confirm-registration").permitAll()
 
-				.requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.POST, "/chat/start").permitAll()
+				.requestMatchers(HttpMethod.GET, "/chat/history").permitAll()
+
+				.requestMatchers(HttpMethod.GET, "/chat/active").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.GET, "/chat/archived").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/chat/**").hasRole("ADMIN")
+
+				.requestMatchers("/ws/**").permitAll()
 
 				.anyRequest().authenticated()
 			)
