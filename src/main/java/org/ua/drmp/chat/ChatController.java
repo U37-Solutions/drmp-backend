@@ -1,0 +1,55 @@
+package org.ua.drmp.chat;
+
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.ua.drmp.chat.dto.ChatMessageDto;
+import org.ua.drmp.chat.dto.ChatResponse;
+import org.ua.drmp.chat.dto.CreateChatRequest;
+import org.ua.drmp.chat.entity.Chat;
+import org.ua.drmp.chat.service.ChatService;
+import org.ua.drmp.swagger.annotation.ApiError400;
+import org.ua.drmp.swagger.annotation.ApiError404;
+
+@RestController
+@RequestMapping("/chat")
+@RequiredArgsConstructor
+public class ChatController {
+	private final ChatService chatService;
+
+	@PostMapping("/start")
+	public ResponseEntity<ChatResponse> startChat(@RequestBody CreateChatRequest request) {
+		return ResponseEntity.ok(chatService.startAnonymousChat(request));
+	}
+
+	@ApiError400
+	@ApiError404
+	@GetMapping("/history")
+	public ResponseEntity<List<ChatMessageDto>> getHistory(@RequestHeader("X-Chat-Token") String token) {
+		return ResponseEntity.ok(chatService.getChatHistoryByToken(token));
+	}
+
+	@DeleteMapping("/{chatId}")
+	public ResponseEntity<Void> deleteChat(@PathVariable Long chatId) {
+		chatService.deleteChat(chatId);
+		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/active")
+	public ResponseEntity<List<Chat>> getActiveChats() {
+		return ResponseEntity.ok(chatService.getActiveChats());
+	}
+
+	@GetMapping("/archived")
+	public ResponseEntity<List<Chat>> getArchivedChats() {
+		return ResponseEntity.ok(chatService.getArchivedChats());
+	}
+}

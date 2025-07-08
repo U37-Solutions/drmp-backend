@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.ua.drmp.chat.entity.ChatMessage;
 import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.service.EmailService;
 
@@ -27,6 +28,9 @@ public class EmailServiceImpl implements EmailService {
 
 	@Value("${spring.mail.username}")
 	private String senderEmail;
+
+	@Value("${app.admin.email}")
+	private String adminEmail;
 
 	@Override
 	public void sendResetPasswordEmail(String email, String token) {
@@ -54,6 +58,16 @@ public class EmailServiceImpl implements EmailService {
 		Context context = new Context();
 		String htmlContent = templateEngine.process("signup-success.html", context);
 		sendHtmlEmail(email, SIGNUP_SUCCESS, htmlContent);
+	}
+
+	@Override
+	public void notifyAdmin(ChatMessage message) {
+		Context context = new Context();
+		context.setVariable("messageContent", message.getContent());
+		context.setVariable("sentAt", message.getSentAt().toString());
+
+		String htmlContent = templateEngine.process("chat-notify.html", context);
+		sendHtmlEmail(adminEmail, "Нове повідомлення в чаті", htmlContent);
 	}
 
 	private void sendHtmlEmail(String to, String subject, String htmlContent) {

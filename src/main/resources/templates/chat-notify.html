@@ -1,0 +1,27 @@
+<table style="width: 100%; text-align: center" cellpadding="0" cellspacing="0" role="none">
+    <tr>
+        <td class="sm-p-6" style="border-radius: 8px; background-color: #fffffe; padding: 24px 36px; border: 1px solid #e2e8f0">
+            <span style="font-size: 20px; line-height: 20px; color: #64748b">DRM Platform</span>
+            <div role="separator" style="line-height: 24px">&zwj;</div>
+            <h1 style="margin: 0 0 24px; font-size: 24px; line-height: 32px; font-weight: 600; color: #0f172a">
+                Нове повідомлення в чаті
+            </h1>
+
+            <p style="margin-bottom: 12px; font-size: 16px; line-height: 24px; color: #475569">
+                Ви отримали нове повідомлення в одному з активних чатів.
+            </p>
+
+            <div style="text-align: left; margin: 20px auto; max-width: 500px; background-color: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #cbd5e1">
+                <p style="margin: 0 0 8px; font-size: 14px; color: #64748b"><strong>Час надсилання:</strong> <span th:text="${sentAt}">2025-07-05T19:20:00</span></p>
+                <p style="margin: 12px 0 0; font-size: 16px; color: #0f172a"><strong>Повідомлення:</strong></p>
+                <p style="margin: 8px 0 0; font-size: 16px; color: #1e293b" th:text="${messageContent}">Тут буде текст повідомлення</p>
+            </div>
+
+            <div role="separator" style="height: 1px; line-height: 1px; background-color: #cbd5e1; margin-top: 24px; margin-bottom: 24px">&zwj;</div>
+
+            <p class="mso-break-all" style="margin: 0; font-size: 12px; line-height: 20px; color: #475569">
+                Ви можете переглянути чат на <a href="https://admin-drmp.u37solutions.com/login" style="color: #1e293b; text-decoration: underline">адмін-панелі платформи DRM</a>.
+            </p>
+        </td>
+    </tr>
+</table>
