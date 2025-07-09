@@ -35,4 +35,10 @@ public class Chat {
 
 	@ManyToOne(optional = false)
 	private Company company;
+
+	@Column(nullable = false)
+	private boolean notifyCompanyUser = true;
+
+	@Column(nullable = false)
+	private Instant updatedAt = Instant.now();
 }

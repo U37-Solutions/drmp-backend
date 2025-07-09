@@ -23,6 +23,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		msg.setContent(content);
 		msg.setSenderType(senderType);
 		msg.setSentAt(Instant.now());
+		chat.setUpdatedAt(Instant.now());
 		return chatMessageRepository.save(msg);
 	}
 

@@ -52,8 +52,8 @@ public class AuthServiceImpl implements AuthService {
 			throw new EmailAlreadyInUseException("Email already in use");
 		}
 
-		Role role = roleRepository.findByName(DRMPRole.USER)
-			.orElseThrow(() -> new ResourceNotFoundException("Default role not found"));
+		Role role = roleRepository.findByName(DRMPRole.ADMIN)
+			.orElseThrow(() -> new ResourceNotFoundException("Admin role not found"));
 
 		User user = User.builder()
 			.email(request.email())
