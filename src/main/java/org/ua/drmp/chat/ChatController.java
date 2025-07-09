@@ -55,7 +55,7 @@ public class ChatController {
 	}
 
 	@PostMapping("/unsubscribe/{chatId}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('COMPANY_USER')")
 	public ResponseEntity<Void> unsubscribe(@PathVariable Long chatId) {
 		chatService.unsubscribeFromNotifications(chatId);
 		return ResponseEntity.ok().build();
