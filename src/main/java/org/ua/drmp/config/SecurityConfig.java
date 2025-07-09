@@ -55,9 +55,10 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/chat/start").permitAll()
 				.requestMatchers(HttpMethod.GET, "/chat/history").permitAll()
 
-				.requestMatchers(HttpMethod.GET, "/chat/active").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.GET, "/chat/archived").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/chat/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.GET, "/chat/active").hasRole("COMPANY_USER")
+				.requestMatchers(HttpMethod.GET, "/chat/archived").hasRole("COMPANY_USER")
+				.requestMatchers(HttpMethod.GET, "/chat//unsubscribe/").hasRole("COMPANY_USER")
+				.requestMatchers(HttpMethod.DELETE, "/chat/**").hasRole("COMPANY_USER")
 
 				.requestMatchers("/ws/**").permitAll()
 
@@ -91,7 +92,7 @@ public class SecurityConfig {
 		// if in future I will set tokens in header, will need
 		// configuration.setExposedHeaders(List.of("Authorization"));
 
-		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Chat-Token"));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
 

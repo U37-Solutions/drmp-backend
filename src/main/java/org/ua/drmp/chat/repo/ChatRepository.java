@@ -10,7 +10,7 @@ import org.ua.drmp.chat.entity.Chat;
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 	Optional<Chat> findByAccessToken(String accessToken);
-	List<Chat> findAllByArchivedFalseAndExpiresAtAfter(Instant now);
+	List<Chat> findByArchivedFalseOrderByUpdatedAtDesc();
 	List<Chat> findTop50ByArchivedTrueOrderByExpiresAtDesc();
 	List<Chat> findByArchivedFalseAndExpiresAtBefore(Instant now); // for scheduler
 }

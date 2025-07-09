@@ -67,8 +67,16 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
+	public void unsubscribeFromNotifications(Long chatId) {
+		Chat chat = chatRepository.findById(chatId)
+			.orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
+		chat.setNotifyCompanyUser(false);
+		chatRepository.save(chat);
+	}
+
+	@Override
 	public List<Chat> getActiveChats() {
-		return chatRepository.findAllByArchivedFalseAndExpiresAtAfter(Instant.now());
+		return chatRepository.findByArchivedFalseOrderByUpdatedAtDesc();
 	}
 
 	@Override

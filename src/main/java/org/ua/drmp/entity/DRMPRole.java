@@ -1,7 +1,7 @@
 package org.ua.drmp.entity;
 
 public enum DRMPRole {
-	USER,
+	COMPANY_USER,
 	ADMIN,
 	EDITOR
 }

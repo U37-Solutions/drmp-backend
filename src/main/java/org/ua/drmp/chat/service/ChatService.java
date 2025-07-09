@@ -12,6 +12,7 @@ public interface ChatService {
 	List<ChatMessageDto> getChatHistoryByToken(String token);
 	Chat validateChatToken(String token);
 	void deleteChat(Long chatId);
+	void unsubscribeFromNotifications(Long chatId);
 	List<Chat> getActiveChats();
 	List<Chat> getArchivedChats();
 }

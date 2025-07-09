@@ -3,6 +3,7 @@ package org.ua.drmp.service.impl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,6 +16,7 @@ import org.ua.drmp.service.EmailService;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailServiceImpl implements EmailService {
 
 	private static final String RESET_PASSWORD = "Відновлення пароля";
@@ -62,6 +64,10 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyAdmin(ChatMessage message) {
+		if (!message.getChat().isNotifyCompanyUser()) {
+			log.info("Notifications disabled for chat {}", message.getChat().getId());
+			return;
+		}
 		Context context = new Context();
 		context.setVariable("messageContent", message.getContent());
 		context.setVariable("sentAt", message.getSentAt().toString());
