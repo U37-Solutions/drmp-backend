@@ -19,11 +19,11 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 	@Override
 	public ChatMessage saveMessage(Chat chat, String content, String senderType) {
 		ChatMessage msg = new ChatMessage();
+		chat.setUpdatedAt(Instant.now());
 		msg.setChat(chat);
 		msg.setContent(content);
 		msg.setSenderType(senderType);
 		msg.setSentAt(Instant.now());
-		chat.setUpdatedAt(Instant.now());
 		return chatMessageRepository.save(msg);
 	}
 
