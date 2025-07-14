@@ -1,0 +1,44 @@
+package org.ua.drmp.company;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.ua.drmp.company.dto.OfficeDto;
+import org.ua.drmp.company.service.OfficeService;
+
+@RestController
+@RequestMapping("/offices")
+@RequiredArgsConstructor
+public class OfficeController {
+	private final OfficeService officeService;
+
+	@GetMapping("/{id}")
+	public ResponseEntity<OfficeDto> getOffice(@PathVariable Long id) {
+		return ResponseEntity.ok(officeService.getOffice(id));
+	}
+
+	@PostMapping("/company/{companyId}")
+	public ResponseEntity<OfficeDto> createOffice(@PathVariable Long companyId,
+		@RequestBody OfficeDto dto) {
+		return ResponseEntity.ok(officeService.createOffice(companyId, dto));
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<OfficeDto> updateOffice(@PathVariable Long id,
+		@RequestBody OfficeDto dto) {
+		return ResponseEntity.ok(officeService.updateOffice(id, dto));
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteOffice(@PathVariable Long id) {
+		officeService.deleteOffice(id);
+		return ResponseEntity.noContent().build();
+	}
+}

@@ -14,8 +14,8 @@ import org.ua.drmp.chat.entity.Chat;
 import org.ua.drmp.chat.repo.ChatRepository;
 import org.ua.drmp.chat.service.ChatMessageService;
 import org.ua.drmp.chat.service.ChatService;
-import org.ua.drmp.company.Company;
-import org.ua.drmp.company.CompanyRepository;
+import org.ua.drmp.company.entity.Company;
+import org.ua.drmp.company.repo.CompanyRepository;
 import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.exception.ResourceNotFoundException;
 
