@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
-import org.ua.drmp.company.Company;
+import org.ua.drmp.company.entity.Company;
 
 @Getter
 @Setter
