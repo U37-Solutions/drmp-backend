@@ -1,5 +1,6 @@
 package org.ua.drmp.company.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,9 +51,11 @@ public class Company {
 	private User user;
 
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<CompanySocial> socials = new ArrayList<>();
 
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<Office> offices = new ArrayList<>();
 }
 

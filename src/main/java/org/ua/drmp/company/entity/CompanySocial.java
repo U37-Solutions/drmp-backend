@@ -1,5 +1,6 @@
 package org.ua.drmp.company.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,5 +29,6 @@ public class CompanySocial {
 
 	@ManyToOne
 	@JoinColumn(name = "company_id")
+	@JsonBackReference
 	private Company company;
 }
