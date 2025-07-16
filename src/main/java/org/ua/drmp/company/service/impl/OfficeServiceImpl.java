@@ -1,6 +1,7 @@
 package org.ua.drmp.company.service.impl;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,12 +12,10 @@ import org.ua.drmp.company.entity.Category;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.Condition;
 import org.ua.drmp.company.entity.Office;
-import org.ua.drmp.company.entity.OfficeRegion;
 import org.ua.drmp.company.entity.ServiceOffice;
 import org.ua.drmp.company.repo.CategoryRepository;
 import org.ua.drmp.company.repo.CompanyRepository;
 import org.ua.drmp.company.repo.ConditionRepository;
-import org.ua.drmp.company.repo.OfficeRegionRepository;
 import org.ua.drmp.company.repo.OfficeRepository;
 import org.ua.drmp.company.repo.ServiceRepository;
 import org.ua.drmp.company.service.OfficeService;
@@ -33,11 +32,25 @@ public class OfficeServiceImpl implements OfficeService {
 	private final OfficeRepository officeRepository;
 	private final CompanyRepository companyRepository;
 	private final OfficeMapper officeMapper;
-	private final OfficeRegionRepository regionRepository;
 	private final ServiceRepository serviceRepository;
 	private final CategoryRepository categoryRepository;
 	private final ConditionRepository conditionRepository;
 	private final UserRepository userRepository;
+
+	@Override
+	public List<OfficeDto> fetchAllOfficeByCompanyId(Long companyId) {
+		Company company = companyRepository.findById(companyId)
+			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+
+		User user = getUser();
+		if (!isOwnerOrAdmin(company, user)) {
+			throw new ForbiddenOperationException("You can't access offices for this company");
+		}
+
+		return officeRepository.findAllByCompanyId(companyId).stream()
+			.map(officeMapper::toDto)
+			.toList();
+	}
 
 	@Override
 	public OfficeDto getOffice(Long officeId) {
@@ -57,14 +70,11 @@ public class OfficeServiceImpl implements OfficeService {
 			throw new ForbiddenOperationException("You can't add office to this company");
 		}
 
-		OfficeRegion region = regionRepository.findById(dto.getRegionId())
-			.orElseThrow(() -> new ResourceNotFoundException("Region not found"));
-
 		Set<ServiceOffice> services = new HashSet<>(serviceRepository.findAllById(dto.getServiceIds()));
 		Set<Category> categories = new HashSet<>(categoryRepository.findAllById(dto.getCategoryIds()));
 		Set<Condition> conditions = new HashSet<>(conditionRepository.findAllById(dto.getConditionIds()));
 
-		Office office = officeMapper.toEntity(dto, company, region, services, categories, conditions, user);
+		Office office = officeMapper.toEntity(dto, company, services, categories, conditions, user);
 		return officeMapper.toDto(officeRepository.save(office));
 	}
 
@@ -77,9 +87,6 @@ public class OfficeServiceImpl implements OfficeService {
 			throw new ForbiddenOperationException("Not allowed to update this office");
 		}
 
-		OfficeRegion region = regionRepository.findById(dto.getRegionId())
-			.orElseThrow(() -> new ResourceNotFoundException("Region not found"));
-
 		Set<ServiceOffice> services = new HashSet<>(serviceRepository.findAllById(dto.getServiceIds()));
 		Set<Category> categories = new HashSet<>(categoryRepository.findAllById(dto.getCategoryIds()));
 		Set<Condition> conditions = new HashSet<>(conditionRepository.findAllById(dto.getConditionIds()));
@@ -90,7 +97,7 @@ public class OfficeServiceImpl implements OfficeService {
 		office.setLatitude(dto.getLatitude());
 		office.setLongitude(dto.getLongitude());
 		office.setLocationName(dto.getLocationName());
-		office.setRegion(region);
+		office.setRegionId(dto.getRegionId());
 		office.setServices(services);
 		office.setCategories(categories);
 		office.setConditions(conditions);

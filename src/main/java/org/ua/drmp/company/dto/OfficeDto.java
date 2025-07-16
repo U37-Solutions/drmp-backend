@@ -19,7 +19,7 @@ public class OfficeDto {
 	private Double latitude;
 	private Double longitude;
 
-	private Long regionId;
+	private Integer regionId;
 	private Long companyId;
 
 	private Set<Long> serviceIds;

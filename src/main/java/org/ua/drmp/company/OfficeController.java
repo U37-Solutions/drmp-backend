@@ -1,5 +1,6 @@
 package org.ua.drmp.company;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,11 @@ import org.ua.drmp.company.service.OfficeService;
 @RequiredArgsConstructor
 public class OfficeController {
 	private final OfficeService officeService;
+
+	@GetMapping("/company/{companyId}")
+	public ResponseEntity<List<OfficeDto>> getAllOfficesForCompany(@PathVariable Long companyId) {
+		return ResponseEntity.ok(officeService.fetchAllOfficeByCompanyId(companyId));
+	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<OfficeDto> getOffice(@PathVariable Long id) {
