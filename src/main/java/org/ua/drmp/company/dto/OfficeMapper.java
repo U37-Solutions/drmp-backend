@@ -7,14 +7,18 @@ import org.ua.drmp.company.entity.Category;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.Condition;
 import org.ua.drmp.company.entity.Office;
-import org.ua.drmp.company.entity.OfficeRegion;
 import org.ua.drmp.company.entity.ServiceOffice;
 import org.ua.drmp.entity.User;
+import org.ua.drmp.exception.ResourceNotFoundException;
 
 @Component
 public class OfficeMapper {
 
 	public OfficeDto toDto(Office office) {
+		Integer regionId = office.getRegionId();
+		if (!RegionConst.regions.containsKey(regionId)) {
+			throw new ResourceNotFoundException("Region not found");
+		}
 		return OfficeDto.builder()
 			.id(office.getId())
 			.workSchedule(office.getWorkSchedule())
@@ -23,7 +27,7 @@ public class OfficeMapper {
 			.locationName(office.getLocationName())
 			.latitude(office.getLatitude())
 			.longitude(office.getLongitude())
-			.regionId(office.getRegion().getId())
+			.regionId(regionId)
 			.companyId(office.getCompany().getId())
 			.serviceIds(office.getServices().stream().map(ServiceOffice::getId).collect(Collectors.toSet()))
 			.categoryIds(office.getCategories().stream().map(Category::getId).collect(Collectors.toSet()))
@@ -33,11 +37,14 @@ public class OfficeMapper {
 
 	public Office toEntity(OfficeDto dto,
 		Company company,
-		OfficeRegion region,
 		Set<ServiceOffice> services,
 		Set<Category> categories,
 		Set<Condition> conditions,
 		User user) {
+		Integer regionId = dto.getRegionId();
+		if (!RegionConst.regions.containsKey(regionId)) {
+			throw new ResourceNotFoundException("Region not found");
+		}
 		return Office.builder()
 			.id(dto.getId())
 			.workSchedule(dto.getWorkSchedule())
@@ -46,7 +53,7 @@ public class OfficeMapper {
 			.locationName(dto.getLocationName())
 			.latitude(dto.getLatitude())
 			.longitude(dto.getLongitude())
-			.region(region)
+			.regionId(regionId)
 			.company(company)
 			.user(user)
 			.services(services)

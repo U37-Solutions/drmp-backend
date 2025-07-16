@@ -1,5 +1,6 @@
 package org.ua.drmp.company;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +24,11 @@ public class CompanyController {
 	@PostMapping
 	void createCompany(@RequestBody CompanyDto companyDto) {
 		companyService.createCompany(companyDto);
+	}
+
+	@GetMapping
+	public ResponseEntity<List<CompanyDto>> fetchAllCompanies() {
+		return ResponseEntity.ok(companyService.fetchAllCompanies());
 	}
 
 	@GetMapping("/{id}")

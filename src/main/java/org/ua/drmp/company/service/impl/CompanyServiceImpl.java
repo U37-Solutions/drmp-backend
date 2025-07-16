@@ -1,5 +1,6 @@
 package org.ua.drmp.company.service.impl;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,12 @@ public class CompanyServiceImpl implements CompanyService {
 	private final CompanyMapper companyMapper;
 	private final CompanyTypeRepository companyTypeRepository;
 	private final UserRepository userRepository;
+
+	@Override
+	public List<CompanyDto> fetchAllCompanies() {
+		List<Company> companies = companyRepository.findAll();
+		return companies.stream().map(companyMapper::toDto).toList();
+	}
 
 	@Override
 	public CompanyDto getCompany(Long companyId) {

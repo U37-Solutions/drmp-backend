@@ -37,10 +37,7 @@ public class Office {
 	private String locationName;
 	private Double latitude;
 	private Double longitude;
-
-	@ManyToOne
-	@JoinColumn(name = "region_id")
-	private OfficeRegion region;
+	private Integer regionId;
 
 	@ManyToOne
 	@JoinColumn(name = "company_id")
