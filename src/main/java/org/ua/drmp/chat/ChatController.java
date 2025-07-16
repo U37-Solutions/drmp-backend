@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.ua.drmp.chat.dto.ChatDto;
 import org.ua.drmp.chat.dto.ChatMessageDto;
 import org.ua.drmp.chat.dto.ChatResponse;
 import org.ua.drmp.chat.dto.CreateChatRequest;
-import org.ua.drmp.chat.entity.Chat;
 import org.ua.drmp.chat.service.ChatService;
 import org.ua.drmp.swagger.annotation.ApiError400;
 import org.ua.drmp.swagger.annotation.ApiError404;
@@ -45,12 +45,12 @@ public class ChatController {
 	}
 
 	@GetMapping("/active")
-	public ResponseEntity<List<Chat>> getActiveChats() {
+	public ResponseEntity<List<ChatDto>> getActiveChats() {
 		return ResponseEntity.ok(chatService.getActiveChats());
 	}
 
 	@GetMapping("/archived")
-	public ResponseEntity<List<Chat>> getArchivedChats() {
+	public ResponseEntity<List<ChatDto>> getArchivedChats() {
 		return ResponseEntity.ok(chatService.getArchivedChats());
 	}
 

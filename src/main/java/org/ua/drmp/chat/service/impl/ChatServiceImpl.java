@@ -7,6 +7,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.ua.drmp.chat.dto.ChatDto;
 import org.ua.drmp.chat.dto.ChatMessageDto;
 import org.ua.drmp.chat.dto.ChatResponse;
 import org.ua.drmp.chat.dto.CreateChatRequest;
@@ -75,12 +76,30 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public List<Chat> getActiveChats() {
-		return chatRepository.findByArchivedFalseOrderByUpdatedAtDesc();
+	public List<ChatDto> getActiveChats() {
+		return chatRepository.findActiveChatsWithCompany()
+			.stream()
+			.map(this::mapToDto)
+			.toList();
 	}
 
 	@Override
-	public List<Chat> getArchivedChats() {
-		return chatRepository.findTop50ByArchivedTrueOrderByExpiresAtDesc();
+	public List<ChatDto> getArchivedChats() {
+		return chatRepository.findTop50ByArchivedTrueOrderByExpiresAtDesc()
+			.stream()
+			.map(this::mapToDto)
+			.toList();
 	}
+
+	private ChatDto mapToDto(Chat chat) {
+		return new ChatDto(
+			chat.getId(),
+			chat.getAccessToken(),
+			chat.getCreatedAt(),
+			chat.getExpiresAt(),
+			chat.getUpdatedAt(),
+			chat.isArchived()
+		);
+	}
+
 }

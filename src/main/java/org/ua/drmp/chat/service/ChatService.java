@@ -1,6 +1,7 @@
 package org.ua.drmp.chat.service;
 
 import java.util.List;
+import org.ua.drmp.chat.dto.ChatDto;
 import org.ua.drmp.chat.dto.ChatMessageDto;
 import org.ua.drmp.chat.dto.ChatResponse;
 import org.ua.drmp.chat.dto.CreateChatRequest;
@@ -13,6 +14,6 @@ public interface ChatService {
 	Chat validateChatToken(String token);
 	void deleteChat(Long chatId);
 	void unsubscribeFromNotifications(Long chatId);
-	List<Chat> getActiveChats();
-	List<Chat> getArchivedChats();
+	List<ChatDto> getActiveChats();
+	List<ChatDto> getArchivedChats();
 }
