@@ -86,7 +86,7 @@ public class SecurityConfig {
 
 		// TODO: before release please remove incorrect urls
 		configuration.setAllowedOrigins(
-			List.of("http://localhost:5173", "http://localhost:8080", "https://admin-drmp.u37solutions.com", "https://api-drmp.u37solutions.com"));
+			List.of("http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "https://drmp.u37solutions.com" "https://admin-drmp.u37solutions.com", "https://api-drmp.u37solutions.com"));
 
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		// if in future I will set tokens in header, will need
