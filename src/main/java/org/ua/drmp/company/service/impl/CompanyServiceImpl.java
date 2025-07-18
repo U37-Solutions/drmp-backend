@@ -44,13 +44,8 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public CompanyDto getCompany(Long companyId) {
-		User user = getUser();
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-
-		if (!isOwnerOrAdmin(company, user)) {
-			throw new ForbiddenOperationException("Not allowed to access this company");
-		}
 
 		return companyMapper.toDto(company);
 	}
@@ -80,11 +75,6 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	@Transactional
 	public void deleteCompany(Long companyId) {
-		User user = getUser();
-		if (!user.hasRole("ADMIN")) {
-			throw new ForbiddenOperationException("Only admin can delete companies");
-		}
-
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
@@ -126,7 +116,4 @@ public class CompanyServiceImpl implements CompanyService {
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
 	}
 
-	private boolean isOwnerOrAdmin(Company company, User user) {
-		return company.getUser().getId().equals(user.getId()) || user.hasRole("ADMIN");
-	}
 }
