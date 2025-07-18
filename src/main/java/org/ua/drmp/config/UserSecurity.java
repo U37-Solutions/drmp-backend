@@ -31,11 +31,19 @@ public class UserSecurity {
 	}
 
 	public boolean isAdminOrOwnerOrEditorCompany(Authentication authentication, Long companyId) {
-		String email = authentication.getName();
-		Company company = companyRepository.findById(companyId).orElseThrow(() -> new ResourceNotFoundException("Not find company"));
-		return userRepository.findByEmail(email)
+		Company company = companyRepository.findById(companyId)
+			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+
+		if (company.getUser() == null) {
+			return userRepository.findByEmail(authentication.getName())
+				.map(user -> user.hasRole("ADMIN"))
+				.orElse(false);
+		}
+
+		return userRepository.findByEmail(authentication.getName())
 			.map(user -> user.getId().equals(company.getUser().getId())
-				|| user.hasRole("ADMIN") || user.hasRole("EDITOR"))
+				|| user.hasRole("ADMIN")
+				|| user.hasRole("EDITOR"))
 			.orElse(false);
 	}
 }
