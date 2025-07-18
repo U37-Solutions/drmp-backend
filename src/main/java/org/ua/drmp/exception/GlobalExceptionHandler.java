@@ -1,8 +1,14 @@
 package org.ua.drmp.exception;
 
+import jakarta.persistence.PersistenceException;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,5 +72,46 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(UserNotFoundException.class)
 	public ResponseEntity<Object> handleUserNotFound(UserNotFoundException ex) {
 		return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.NOT_FOUND);
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+		String message = extractRootCauseMessage(ex);
+		return buildErrorResponse("Data integrity error: " + message);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException ex) {
+		String message = ex.getSQLException() != null ? ex.getSQLException().getMessage() : ex.getMessage();
+		return buildErrorResponse("Constraint violation: " + message);
+	}
+
+	@ExceptionHandler(PersistenceException.class)
+	public ResponseEntity<Map<String, String>> handlePersistence(PersistenceException ex) {
+		return buildErrorResponse("Persistence error: " + extractRootCauseMessage(ex));
+	}
+
+	@ExceptionHandler(SQLException.class)
+	public ResponseEntity<Map<String, String>> handleSqlException(SQLException ex) {
+		return buildErrorResponse("SQL error: " + ex.getMessage());
+	}
+
+	@ExceptionHandler(BadSqlGrammarException.class)
+	public ResponseEntity<Map<String, String>> handleBadSqlGrammar(BadSqlGrammarException ex) {
+		return buildErrorResponse("Bad SQL syntax: " + ex.getMessage());
+	}
+
+	private ResponseEntity<Map<String, String>> buildErrorResponse(String message) {
+		Map<String, String> errorBody = new HashMap<>();
+		errorBody.put("error", message);
+		return new ResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+	}
+
+	private String extractRootCauseMessage(Throwable ex) {
+		Throwable root = ex;
+		while (root.getCause() != null) {
+			root = root.getCause();
+		}
+		return root.getMessage();
 	}
 }

@@ -30,28 +30,37 @@ public class CompanyController {
 		companyService.createCompany(companyDto);
 	}
 
+	// ADMIN, EDITOR
+	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
 	@GetMapping("/all")
 	public ResponseEntity<List<CompanyDto>> fetchAllCompanies() {
 		return ResponseEntity.ok(companyService.fetchAllCompanies());
 	}
 
+	// ADMIN, EDITOR
+	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
 	@GetMapping
 	public ResponseEntity<List<CompanyDto>> getCompanies(@RequestParam(name = "status", required = false) CompanyStatus status) {
 		return ResponseEntity.ok(companyService.fetchCompanyByStatus(Optional.ofNullable(status)));
 	}
 
+	// ADMIN, EDITOR, COMPANY_ADMIN (власник компанії)
+	@PreAuthorize("@userSecurity.isAdminEditorOrCompanyAdmin(authentication, #id)")
 	@GetMapping("/{id}")
-	@PreAuthorize("@userSecurity.isAdminOrOwnerOrEditorCompany(authentication, #id)")
 	public ResponseEntity<CompanyDto> getCompany(@PathVariable Long id) {
 		return ResponseEntity.ok(companyService.getCompany(id));
 	}
 
+	// ADMIN або COMPANY_ADMIN (власник компанії)
+	@PreAuthorize("@userSecurity.isAdminOrCompanyAdmin(authentication, #id)")
 	@PutMapping("/{id}")
 	public ResponseEntity<CompanyDto> updateCompany(@PathVariable Long id,
 		@RequestBody CompanyDto dto) {
 		return ResponseEntity.ok(companyService.updateCompany(id, dto));
 	}
 
+	// ADMIN або COMPANY_ADMIN (власник компанії)
+	@PreAuthorize("@userSecurity.isAdminOrCompanyAdmin(authentication, #id)")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
 		companyService.deleteCompany(id);

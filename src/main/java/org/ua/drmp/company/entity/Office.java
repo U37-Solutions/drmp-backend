@@ -33,7 +33,6 @@ public class Office {
 	private Long id;
 
 	private String workSchedule;
-	private String donorSupport;
 	private String additionalDescription;
 	private String locationName;
 	private Double latitude;

@@ -10,11 +10,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,6 +41,9 @@ public class Company {
 	private String contactName;
 	private String phone;
 	private String email;
+	private String donorSupport;
+	@Column(nullable = false)
+	private String ownershipType;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -46,9 +53,14 @@ public class Company {
 	@JoinColumn(name = "company_type_id")
 	private CompanyType companyType;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private User user;
+	@ManyToMany
+	@JoinTable(
+		name = "company_users",
+		joinColumns = @JoinColumn(name = "company_id"),
+		inverseJoinColumns = @JoinColumn(name = "user_id")
+	)
+	@JsonManagedReference
+	private Set<User> users = new HashSet<>();
 
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference

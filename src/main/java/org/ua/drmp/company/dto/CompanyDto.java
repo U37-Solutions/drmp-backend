@@ -18,8 +18,10 @@ public class CompanyDto {
 	private String phone;
 	private String email;
 	private String status;
+	private String donorSupport;
+	private String ownershipType;
 	private Long companyTypeId;
-	private Long userId;
+	private List<Long> userIds;
 	private List<CompanySocialDto> socials;
 }
 

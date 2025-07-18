@@ -13,6 +13,8 @@ public class CompanyRegisterRequest {
 	private String phone;
 	private String email;
 	private Long companyTypeId;
+	private String ownershipType;
+	private String donorSupport;
 	private List<CompanySocialDto> socials;
 	private List<OfficeDto> offices;
 }
