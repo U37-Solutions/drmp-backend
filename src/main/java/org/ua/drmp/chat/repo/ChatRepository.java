@@ -5,14 +5,18 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.ua.drmp.chat.entity.Chat;
 
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 	Optional<Chat> findByAccessToken(String accessToken);
-	@Query("SELECT c FROM Chat c JOIN FETCH c.company WHERE c.archived = false ORDER BY c.updatedAt DESC")
-	List<Chat> findActiveChatsWithCompany();
-	List<Chat> findTop50ByArchivedTrueOrderByExpiresAtDesc();
+	@Query("SELECT c FROM Chat c WHERE c.company.id IN :companyIds AND c.archived = false")
+	List<Chat> findActiveChatsByCompanyIds(@Param("companyIds") List<Long> companyIds);
+
+	@Query("SELECT c FROM Chat c WHERE c.company.id IN :companyIds AND c.archived = true ORDER BY c.expiresAt DESC")
+	List<Chat> findTop50ArchivedChatsByCompanyIds(@Param("companyIds") List<Long> companyIds);
+
 	List<Chat> findByArchivedFalseAndExpiresAtBefore(Instant now); // for scheduler
 }
