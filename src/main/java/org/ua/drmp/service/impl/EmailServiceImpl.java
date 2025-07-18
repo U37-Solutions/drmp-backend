@@ -72,6 +72,7 @@ public class EmailServiceImpl implements EmailService {
 		Context context = new Context();
 		context.setVariable("messageContent", message.getContent());
 		context.setVariable("sentAt", message.getSentAt().toString());
+		context.setVariable("link", baseUrl + "/chats?chatId=" + message.getChat().getId());
 
 		String htmlContent = templateEngine.process("new-message.html", context);
 		sendHtmlEmail(adminEmail, "Нове повідомлення в чаті", htmlContent);
