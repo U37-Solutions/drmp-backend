@@ -61,7 +61,8 @@ public class CompanyServiceImpl implements CompanyService {
 		company.setName(dto.getName());
 		company.setCode(dto.getCode());
 		company.setContactName(dto.getContactName());
-		company.setOwnershipType(company.getOwnershipType());
+		company.setOwnershipType(dto.getOwnershipType());
+		company.setDonorSupport(dto.getDonorSupport());
 		company.setCompanyType(company.getCompanyType());
 		company.setPhone(dto.getPhone());
 		company.setEmail(dto.getEmail());
@@ -103,7 +104,7 @@ public class CompanyServiceImpl implements CompanyService {
 		company.setCode(companyDto.getCode());
 		company.setContactName(companyDto.getContactName());
 		company.setOwnershipType(company.getOwnershipType());
-		company.setCompanyType(company.getCompanyType());
+		company.setDonorSupport(company.getDonorSupport());
 		company.setPhone(companyDto.getPhone());
 		company.setEmail(companyDto.getEmail());
 		company.setStatus(CompanyStatus.valueOf(companyDto.getStatus()));
