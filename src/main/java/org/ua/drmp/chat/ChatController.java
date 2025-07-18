@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,13 +46,17 @@ public class ChatController {
 	}
 
 	@GetMapping("/active")
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'COMPANY_USER')")
 	public ResponseEntity<List<ChatDto>> getActiveChats() {
-		return ResponseEntity.ok(chatService.getActiveChats());
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		return ResponseEntity.ok(chatService.getActiveChats(email));
 	}
 
 	@GetMapping("/archived")
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'COMPANY_USER')")
 	public ResponseEntity<List<ChatDto>> getArchivedChats() {
-		return ResponseEntity.ok(chatService.getArchivedChats());
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		return ResponseEntity.ok(chatService.getArchivedChats(email));
 	}
 
 	@PostMapping("/unsubscribe/{chatId}")
@@ -61,4 +66,10 @@ public class ChatController {
 		return ResponseEntity.ok().build();
 	}
 
+	@PostMapping("/subscribe/{chatId}")
+	@PreAuthorize("hasRole('COMPANY_USER')")
+	public ResponseEntity<Void> subscribe(@PathVariable Long chatId) {
+		chatService.subscribeToNotifications(chatId);
+		return ResponseEntity.ok().build();
+	}
 }

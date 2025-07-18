@@ -8,6 +8,7 @@ public record ChatDto(
 	Instant createdAt,
 	Instant expiresAt,
 	Instant updatedAt,
-	boolean archived
+	boolean archived,
+	String lastMessage
 ) {
 }

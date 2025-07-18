@@ -32,9 +32,6 @@ public class EmailServiceImpl implements EmailService {
 	@Value("${spring.mail.username}")
 	private String senderEmail;
 
-	@Value("${app.admin.email}")
-	private String adminEmail;
-
 	@Override
 	public void sendResetPasswordEmail(String email, String token) {
 		Context context = new Context();
@@ -75,7 +72,7 @@ public class EmailServiceImpl implements EmailService {
 		context.setVariable("link", baseUrl + "/chats?chatId=" + message.getChat().getId());
 
 		String htmlContent = templateEngine.process("new-message.html", context);
-		sendHtmlEmail(adminEmail, "Нове повідомлення в чаті", htmlContent);
+		sendHtmlEmail(message.getChat().getCompany().getEmail(), "Нове повідомлення в чаті", htmlContent);
 	}
 
 	@Override
@@ -84,7 +81,7 @@ public class EmailServiceImpl implements EmailService {
 		context.setVariable("companyName", company.getName());
 		context.setVariable("reviewLink", baseUrl + "/admin/companies/" + company.getId());
 		String htmlContent = templateEngine.process("company-review-notify.html", context);
-		sendHtmlEmail(adminEmail, "Нова компанія чекає підтвердження", htmlContent);
+		sendHtmlEmail(company.getEmail(), "Нова компанія чекає підтвердження", htmlContent);
 	}
 
 	@Override

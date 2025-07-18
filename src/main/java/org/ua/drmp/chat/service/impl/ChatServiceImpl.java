@@ -3,6 +3,7 @@ package org.ua.drmp.chat.service.impl;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +13,18 @@ import org.ua.drmp.chat.dto.ChatMessageDto;
 import org.ua.drmp.chat.dto.ChatResponse;
 import org.ua.drmp.chat.dto.CreateChatRequest;
 import org.ua.drmp.chat.entity.Chat;
+import org.ua.drmp.chat.entity.ChatMessage;
+import org.ua.drmp.chat.repo.ChatMessageRepository;
 import org.ua.drmp.chat.repo.ChatRepository;
 import org.ua.drmp.chat.service.ChatMessageService;
 import org.ua.drmp.chat.service.ChatService;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.repo.CompanyRepository;
+import org.ua.drmp.entity.User;
 import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.exception.ResourceNotFoundException;
+import org.ua.drmp.exception.UserNotFoundException;
+import org.ua.drmp.repo.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +33,9 @@ public class ChatServiceImpl implements ChatService {
 
 	private final ChatRepository chatRepository;
 	private final ChatMessageService chatMessageService;
+	private final ChatMessageRepository chatMessageRepository;
 	private final CompanyRepository companyRepository;
+	private final UserRepository userRepository;
 	@Override
 	public ChatResponse startAnonymousChat(CreateChatRequest request) {
 		Company company = companyRepository.findById(request.companyId())
@@ -56,8 +64,9 @@ public class ChatServiceImpl implements ChatService {
 		Chat chat = chatRepository.findByAccessToken(token)
 			.orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
 
-		if (chat.isArchived()) throw new BadRequestException("Chat is archived");
-		if (chat.getExpiresAt().isBefore(Instant.now())) throw new BadRequestException("Chat expired");
+		if (chat.getExpiresAt().isBefore(Instant.now())) {
+			throw new BadRequestException("Chat expired");
+		}
 
 		return chat;
 	}
@@ -76,29 +85,55 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public List<ChatDto> getActiveChats() {
-		return chatRepository.findActiveChatsWithCompany()
+	public List<ChatDto> getActiveChats(String email) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
+
+		List<Long> companyIds = user.getCompanies().stream()
+			.map(Company::getId)
+			.toList();
+
+		return chatRepository.findActiveChatsByCompanyIds(companyIds)
 			.stream()
 			.map(this::mapToDto)
 			.toList();
 	}
 
 	@Override
-	public List<ChatDto> getArchivedChats() {
-		return chatRepository.findTop50ByArchivedTrueOrderByExpiresAtDesc()
+	public List<ChatDto> getArchivedChats(String email) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
+
+		List<Long> companyIds = user.getCompanies().stream()
+			.map(Company::getId)
+			.toList();
+
+		return chatRepository.findTop50ArchivedChatsByCompanyIds(companyIds)
 			.stream()
 			.map(this::mapToDto)
 			.toList();
 	}
 
+	@Override
+	public void subscribeToNotifications(Long chatId) {
+		Chat chat = chatRepository.findById(chatId)
+			.orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
+		chat.setNotifyCompanyUser(true);
+		chatRepository.save(chat);
+	}
+
 	private ChatDto mapToDto(Chat chat) {
+		Optional<ChatMessage> lastMsgOpt = chatMessageRepository.findTopByChatOrderBySentAtDesc(chat);
+
+		String lastMessage = lastMsgOpt.map(ChatMessage::getContent).orElse(null);
 		return new ChatDto(
 			chat.getId(),
 			chat.getAccessToken(),
 			chat.getCreatedAt(),
 			chat.getExpiresAt(),
 			chat.getUpdatedAt(),
-			chat.isArchived()
+			chat.isArchived(),
+			lastMessage
 		);
 	}
 
