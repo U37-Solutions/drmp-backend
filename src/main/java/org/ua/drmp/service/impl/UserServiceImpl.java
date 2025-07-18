@@ -123,8 +123,14 @@ public class UserServiceImpl implements UserService {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
+		DRMPRole drmpRole = user.getRoles().stream().findFirst().orElseThrow().getName();
+		Long companyId = null;
+		if (drmpRole == DRMPRole.COMPANY_ADMIN || drmpRole == DRMPRole.COMPANY_USER) {
+			companyId = user.getCompanies().stream().findFirst().get().getId();
+		}
 		return new UserSessionResponse(
-			user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getRoles().stream().findFirst().orElseThrow().getName()
+			user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), drmpRole, companyId
+
 		);
 	}
 
