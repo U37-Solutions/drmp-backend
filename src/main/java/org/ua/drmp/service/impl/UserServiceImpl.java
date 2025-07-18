@@ -61,8 +61,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserResponse> fetchUsers() {
-		return userRepository.findAll().stream().map(this::mapToResponse).toList();
+	public List<UserResponse> fetchUsers(DRMPRole role) {
+		List<User> users;
+		if (role == null) {
+			users = userRepository.findAll();
+		} else {
+			users = userRepository.findAllByRoles_Name(role);
+		}
+		return users.stream()
+			.map(this::mapToResponse)
+			.toList();
 	}
 
 	@Override

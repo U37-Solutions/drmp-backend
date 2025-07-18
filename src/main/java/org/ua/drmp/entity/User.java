@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.ua.drmp.company.entity.Company;
 
 @Getter
 @Setter
@@ -46,6 +47,11 @@ public class User {
 		joinColumns = @JoinColumn(name = "user_id"),
 		inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
+
+	@ManyToMany(mappedBy = "users")
+	@JsonIgnore
+	private Set<Company> companies = new HashSet<>();
+
 
 	public boolean hasRole(String roleName) {
 		return roles.stream()

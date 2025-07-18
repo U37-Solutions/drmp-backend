@@ -7,6 +7,7 @@ import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
 import org.ua.drmp.dto.UserSessionResponse;
+import org.ua.drmp.entity.DRMPRole;
 import org.ua.drmp.entity.User;
 
 public interface UserService {
@@ -14,7 +15,7 @@ public interface UserService {
 
 	void resetPassword(String email, String newPassword);
 
-	List<UserResponse> fetchUsers();
+	List<UserResponse> fetchUsers(DRMPRole role);
 
 	User fetchByEmail(String email);
 

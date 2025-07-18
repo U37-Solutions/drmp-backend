@@ -22,28 +22,72 @@ public class UserSecurity {
 			.orElse(false);
 	}
 
-	public boolean isAdminOrOwnerOrEditor(Authentication authentication, Long userId) {
+	public boolean isAdminOrOwner(Authentication authentication, Long userId) {
 		String email = authentication.getName();
 		return userRepository.findByEmail(email)
-			.map(user -> user.getId().equals(userId)
-				|| user.hasRole("ADMIN") || user.hasRole("EDITOR"))
+			.map(user -> user.hasRole("ADMIN") || user.getId().equals(userId))
 			.orElse(false);
 	}
 
-	public boolean isAdminOrOwnerOrEditorCompany(Authentication authentication, Long companyId) {
+	public boolean isAdminOrOwnerOrEditor(Authentication authentication, Long userId) {
+		String email = authentication.getName();
+		return userRepository.findByEmail(email)
+			.map(user ->
+				user.getId().equals(userId)
+					|| user.hasRole("ADMIN")
+					|| user.hasRole("EDITOR"))
+			.orElse(false);
+	}
+
+	/**
+	 * Доступ мають ADMIN або COMPANY_ADMIN (власник компанії)
+	 */
+	public boolean isAdminOrCompanyAdmin(Authentication authentication, Long companyId) {
+		String email = authentication.getName();
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-		if (company.getUser() == null) {
-			return userRepository.findByEmail(authentication.getName())
-				.map(user -> user.hasRole("ADMIN"))
-				.orElse(false);
-		}
+		return userRepository.findByEmail(email)
+			.map(user ->
+				user.hasRole("ADMIN") ||
+					(company.getUsers().contains(user) && user.hasRole("COMPANY_ADMIN"))
+			)
+			.orElse(false);
+	}
 
-		return userRepository.findByEmail(authentication.getName())
-			.map(user -> user.getId().equals(company.getUser().getId())
-				|| user.hasRole("ADMIN")
-				|| user.hasRole("EDITOR"))
+	/**
+	 * Доступ мають ADMIN, EDITOR або COMPANY_ADMIN (власник компанії)
+	 */
+	public boolean isAdminEditorOrCompanyAdmin(Authentication authentication, Long companyId) {
+		String email = authentication.getName();
+		Company company = companyRepository.findById(companyId)
+			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+
+		return userRepository.findByEmail(email)
+			.map(user ->
+				user.hasRole("ADMIN") ||
+					user.hasRole("EDITOR") ||
+					(company.getUsers().contains(user) && user.hasRole("COMPANY_ADMIN"))
+			)
+			.orElse(false);
+	}
+
+	/**
+	 * Доступ мають ADMIN, EDITOR, COMPANY_ADMIN або COMPANY_USER
+	 */
+	public boolean isCompanyUserOrAbove(Authentication authentication, Long companyId) {
+		String email = authentication.getName();
+		Company company = companyRepository.findById(companyId)
+			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+
+		return userRepository.findByEmail(email)
+			.map(user ->
+				user.hasRole("ADMIN") ||
+					user.hasRole("EDITOR") ||
+					(company.getUsers().contains(user) && (
+						user.hasRole("COMPANY_ADMIN") || user.hasRole("COMPANY_USER"))
+					)
+			)
 			.orElse(false);
 	}
 }

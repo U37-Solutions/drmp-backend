@@ -3,6 +3,7 @@ package org.ua.drmp.company.service.impl;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import org.ua.drmp.company.repo.CompanyRepository;
 import org.ua.drmp.company.repo.CompanyTypeRepository;
 import org.ua.drmp.company.service.CompanyService;
 import org.ua.drmp.entity.User;
-import org.ua.drmp.exception.ForbiddenOperationException;
 import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.exception.UserNotFoundException;
 import org.ua.drmp.repo.TokenRepository;
@@ -61,6 +61,8 @@ public class CompanyServiceImpl implements CompanyService {
 		company.setName(dto.getName());
 		company.setCode(dto.getCode());
 		company.setContactName(dto.getContactName());
+		company.setOwnershipType(company.getOwnershipType());
+		company.setCompanyType(company.getCompanyType());
 		company.setPhone(dto.getPhone());
 		company.setEmail(dto.getEmail());
 		company.setCompanyType(type);
@@ -78,14 +80,16 @@ public class CompanyServiceImpl implements CompanyService {
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-		User linkedUser = company.getUser();
+		Set<User> linkedUsers = company.getUsers();
 
-		companyRepository.delete(company);
-
-		if (linkedUser != null) {
-			tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(linkedUser.getId()));
-			userRepository.delete(linkedUser);
+		for (User user : linkedUsers) {
+			user.getCompanies().remove(company);
+			tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(user.getId()));
+			userRepository.delete(user);
 		}
+
+		company.getUsers().clear(); // на всяк випадок, щоб Hibernate не намагався оновлювати зв’язки
+		companyRepository.delete(company);
 	}
 
 
@@ -98,11 +102,13 @@ public class CompanyServiceImpl implements CompanyService {
 		company.setName(companyDto.getName());
 		company.setCode(companyDto.getCode());
 		company.setContactName(companyDto.getContactName());
+		company.setOwnershipType(company.getOwnershipType());
+		company.setCompanyType(company.getCompanyType());
 		company.setPhone(companyDto.getPhone());
 		company.setEmail(companyDto.getEmail());
 		company.setStatus(CompanyStatus.valueOf(companyDto.getStatus()));
 		company.setCompanyType(type);
-		company.setUser(user);
+		company.setUsers(Set.of(user));
 		company.getSocials().clear();
 		companyDto.getSocials().forEach(s -> company.getSocials()
 			.add(companyMapper.toSocialEntity(s, company)));

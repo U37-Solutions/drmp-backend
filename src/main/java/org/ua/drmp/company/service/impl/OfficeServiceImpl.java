@@ -39,14 +39,6 @@ public class OfficeServiceImpl implements OfficeService {
 
 	@Override
 	public List<OfficeDto> fetchAllOfficeByCompanyId(Long companyId) {
-		Company company = companyRepository.findById(companyId)
-			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-
-		User user = getUser();
-		if (!isOwnerOrAdmin(company, user)) {
-			throw new ForbiddenOperationException("You can't access offices for this company");
-		}
-
 		return officeRepository.findAllByCompanyId(companyId).stream()
 			.map(officeMapper::toDto)
 			.toList();
@@ -66,10 +58,6 @@ public class OfficeServiceImpl implements OfficeService {
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-		if (!isOwnerOrAdmin(company, user)) {
-			throw new ForbiddenOperationException("You can't add office to this company");
-		}
-
 		Set<ServiceOffice> services = new HashSet<>(serviceRepository.findAllById(dto.getServiceIds()));
 		Set<Category> categories = new HashSet<>(categoryRepository.findAllById(dto.getCategoryIds()));
 		Set<Condition> conditions = new HashSet<>(conditionRepository.findAllById(dto.getConditionIds()));
@@ -83,16 +71,11 @@ public class OfficeServiceImpl implements OfficeService {
 		Office office = officeRepository.findById(officeId)
 			.orElseThrow(() -> new ResourceNotFoundException("Office not found"));
 
-		if (!isUserLinkedToCompany(office.getCompany(), getUser())) {
-			throw new ForbiddenOperationException("Not allowed to update this office");
-		}
-
 		Set<ServiceOffice> services = new HashSet<>(serviceRepository.findAllById(dto.getServiceIds()));
 		Set<Category> categories = new HashSet<>(categoryRepository.findAllById(dto.getCategoryIds()));
 		Set<Condition> conditions = new HashSet<>(conditionRepository.findAllById(dto.getConditionIds()));
 
 		office.setWorkSchedule(dto.getWorkSchedule());
-		office.setDonorSupport(dto.getDonorSupport());
 		office.setAdditionalDescription(dto.getAdditionalDescription());
 		office.setLatitude(dto.getLatitude());
 		office.setLongitude(dto.getLongitude());
@@ -113,13 +96,6 @@ public class OfficeServiceImpl implements OfficeService {
 		officeRepository.deleteById(officeId);
 	}
 
-	private boolean isOwnerOrAdmin(Company company, User user) {
-		return company.getUser().getId().equals(user.getId()) || user.hasRole("ADMIN");
-	}
-
-	private boolean isUserLinkedToCompany(Company company, User user) {
-		return isOwnerOrAdmin(company, user);
-	}
 
 	private User getUser() {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.ua.drmp.dto.ChangePasswordRequest;
 import org.ua.drmp.dto.ConfirmRegistrationRequest;
@@ -17,6 +18,7 @@ import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
 import org.ua.drmp.dto.UserSessionResponse;
+import org.ua.drmp.entity.DRMPRole;
 import org.ua.drmp.service.UserService;
 import org.ua.drmp.swagger.annotation.ApiError400;
 import org.ua.drmp.swagger.annotation.ApiError401;
@@ -37,29 +39,35 @@ public class UserController {
 		return ResponseEntity.ok("Password changed successfully");
 	}
 
+	// ADMIN, EDITOR
+	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
 	@GetMapping(USERS_ENDPOINT)
-	public List<UserResponse> fetchUsers() {
-		return userService.fetchUsers();
+	public List<UserResponse> fetchUsers(@RequestParam(required = false) DRMPRole role) {
+		return userService.fetchUsers(role);
 	}
 
+	// всі (ADMIN, EDITOR, власник (COMPANY_ADMIN, COMPANY_USER))
 	@ApiError404
-	@GetMapping(USERS_ENDPOINT + "/{id}")
 	@PreAuthorize("@userSecurity.isAdminOrOwnerOrEditor(authentication, #id)")
+	@GetMapping(USERS_ENDPOINT + "/{id}")
 	public UserResponse fetchUserById(@PathVariable("id") Long id) {
 		return userService.fetchUserById(id);
 	}
 
+	// ADMIN, або власник (COMPANY_ADMIN або COMPANY_USER самого себе)
 	@ApiError404
+	@PreAuthorize("@userSecurity.isAdminOrOwner(authentication, #id)")
 	@DeleteMapping(USERS_ENDPOINT + "/{id}")
 	public ResponseEntity<?> deleteUserById(@PathVariable("id") Long id) {
 		userService.deleteUserById(id);
 		return ResponseEntity.ok("User deleted successfully");
 	}
 
+	// Власник (COMPANY_ADMIN або COMPANY_USER самого себе)
 	@ApiError403
 	@ApiError404
-	@PutMapping(USERS_ENDPOINT + "/{id}")
 	@PreAuthorize("@userSecurity.isOwner(authentication, #id)")
+	@PutMapping(USERS_ENDPOINT + "/{id}")
 	public ResponseEntity<?> updateUser(@PathVariable("id") Long id, @RequestBody UserRequest userRequest) {
 		userService.updateUser(id, userRequest);
 		return ResponseEntity.ok("User updated successfully");

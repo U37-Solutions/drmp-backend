@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ua.drmp.company.dto.CompanyMapper;
@@ -57,6 +58,8 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 			.name(request.getName())
 			.code(request.getCode())
 			.contactName(request.getContactName())
+			.ownershipType(request.getOwnershipType())
+			.donorSupport(request.getDonorSupport())
 			.phone(request.getPhone())
 			.email(request.getEmail())
 			.status(CompanyStatus.REVIEW)
@@ -92,12 +95,12 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-		if (company.getUser() != null) {
+		if (company.getUsers() != null && !company.getUsers().isEmpty()) {
 			throw new BadRequestException("Company already approved");
 		}
 
-		if (userRepository.existsByEmail(company.getEmail()) && company.getStatus() != CompanyStatus.REJECTED) {
-			throw new BadRequestException("Company with that email already registered");
+		if (userRepository.existsByEmail(company.getEmail())) {
+			throw new BadRequestException("User with this email already exists");
 		}
 
 		String rawPassword = RandomStringUtils.randomAlphanumeric(10);
@@ -105,22 +108,28 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 		String[] nameParts = company.getContactName().trim().split(" ", 2);
 		String firstName = nameParts.length > 0 ? nameParts[0] : "";
 		String lastName = nameParts.length > 1 ? nameParts[1] : "";
+
 		User user = User.builder()
 			.email(company.getEmail())
 			.firstName(firstName)
 			.lastName(lastName)
 			.password(encodedPassword)
-			.roles(Set.of(getCompanyUserRole()))
+			.roles(Set.of(setCompanyAdminRole()))
 			.build();
-		userRepository.save(user);
 
-		company.setUser(user);
+		try {
+			userRepository.save(user);
+		} catch (DataIntegrityViolationException ex) {
+			throw new BadRequestException("User with this email already exists");
+		}
+
+		company.getUsers().add(user);
 		company.setStatus(CompanyStatus.ACTIVE);
-		//companyRepository.save(company);
-		companyMapper.toDto(companyRepository.save(company));
+		companyRepository.save(company);
 
 		emailService.sendAccountCredentialsEmail(user.getEmail(), rawPassword);
 	}
+
 
 	@Override
 	public void rejectCompany(Long companyId, RejectCompanyRequest request) {
@@ -152,8 +161,8 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 		);
 	}
 
-	private Role getCompanyUserRole() {
-		return roleRepository.findByName(DRMPRole.COMPANY_USER)
+	private Role setCompanyAdminRole() {
+		return roleRepository.findByName(DRMPRole.COMPANY_ADMIN)
 			.orElseThrow(() -> new ResourceNotFoundException("Role COMPANY_USER not found"));
 	}
 

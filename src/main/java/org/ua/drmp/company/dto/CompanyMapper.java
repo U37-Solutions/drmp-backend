@@ -1,5 +1,6 @@
 package org.ua.drmp.company.dto;
 
+import java.util.Set;
 import org.springframework.stereotype.Component;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.CompanySocial;
@@ -16,30 +17,38 @@ public class CompanyMapper {
 			.name(company.getName())
 			.code(company.getCode())
 			.contactName(company.getContactName())
+			.ownershipType(company.getOwnershipType())
+			.donorSupport(company.getDonorSupport())
 			.phone(company.getPhone())
 			.email(company.getEmail())
 			.status(company.getStatus().name())
 			.companyTypeId(company.getCompanyType().getId())
-			.userId(company.getUser() != null ? company.getUser().getId() : null)
+			.userIds(company.getUsers().stream()
+				.map(User::getId)
+				.toList())
 			.socials(company.getSocials().stream()
 				.map(this::mapSocial)
 				.toList())
 			.build();
 	}
 
-	public Company toEntity(CompanyDto dto, CompanyType type, User user) {
+
+	public Company toEntity(CompanyDto dto, CompanyType type, Set<User> users) {
 		return Company.builder()
 			.id(dto.getId())
 			.name(dto.getName())
 			.code(dto.getCode())
 			.contactName(dto.getContactName())
+			.ownershipType(dto.getOwnershipType())
+			.donorSupport(dto.getDonorSupport())
 			.phone(dto.getPhone())
 			.email(dto.getEmail())
 			.status(CompanyStatus.valueOf(dto.getStatus()))
 			.companyType(type)
-			.user(user)
+			.users(users)
 			.build();
 	}
+
 
 	public CompanySocialDto mapSocial(CompanySocial social) {
 		return CompanySocialDto.builder()
