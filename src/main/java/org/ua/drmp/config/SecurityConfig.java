@@ -60,6 +60,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/chat//unsubscribe/").hasRole("COMPANY_USER")
 				.requestMatchers(HttpMethod.DELETE, "/chat/**").hasRole("COMPANY_USER")
 
+				.requestMatchers(HttpMethod.POST, "/company-register").permitAll()
 				.requestMatchers("/ws/**").permitAll()
 
 				.anyRequest().authenticated()

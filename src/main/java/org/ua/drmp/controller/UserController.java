@@ -44,7 +44,7 @@ public class UserController {
 
 	@ApiError404
 	@GetMapping(USERS_ENDPOINT + "/{id}")
-	@PreAuthorize("@userSecurity.isAdminOrOwner(authentication, #id)")
+	@PreAuthorize("@userSecurity.isAdminOrOwnerOrEditor(authentication, #id)")
 	public UserResponse fetchUserById(@PathVariable("id") Long id) {
 		return userService.fetchUserById(id);
 	}

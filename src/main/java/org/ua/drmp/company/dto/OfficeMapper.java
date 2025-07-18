@@ -61,5 +61,30 @@ public class OfficeMapper {
 			.conditions(conditions)
 			.build();
 	}
+
+	public Office toEntityWithoutUser(OfficeDto dto,
+		Company company,
+		Set<ServiceOffice> services,
+		Set<Category> categories,
+		Set<Condition> conditions) {
+		Integer regionId = dto.getRegionId();
+		if (!RegionConst.regions.containsKey(regionId)) {
+			throw new ResourceNotFoundException("Region not found");
+		}
+		return Office.builder()
+			.id(dto.getId())
+			.workSchedule(dto.getWorkSchedule())
+			.donorSupport(dto.getDonorSupport())
+			.additionalDescription(dto.getAdditionalDescription())
+			.locationName(dto.getLocationName())
+			.latitude(dto.getLatitude())
+			.longitude(dto.getLongitude())
+			.regionId(regionId)
+			.company(company)
+			.services(services)
+			.categories(categories)
+			.conditions(conditions)
+			.build();
+	}
 }
 
