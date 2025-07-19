@@ -55,11 +55,6 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/chat/start").permitAll()
 				.requestMatchers(HttpMethod.GET, "/chat/history").permitAll()
 
-				.requestMatchers(HttpMethod.GET, "/chat/active").hasRole("COMPANY_USER")
-				.requestMatchers(HttpMethod.GET, "/chat/archived").hasRole("COMPANY_USER")
-				.requestMatchers(HttpMethod.GET, "/chat//unsubscribe/").hasRole("COMPANY_USER")
-				.requestMatchers(HttpMethod.DELETE, "/chat/**").hasRole("COMPANY_USER")
-
 				.requestMatchers(HttpMethod.POST, "/company-register").permitAll()
 				.requestMatchers("/ws/**").permitAll()
 
