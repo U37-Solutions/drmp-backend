@@ -40,6 +40,7 @@ public class ChatController {
 	}
 
 	@DeleteMapping("/{chatId}")
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'COMPANY_USER')")
 	public ResponseEntity<Void> deleteChat(@PathVariable Long chatId) {
 		chatService.deleteChat(chatId);
 		return ResponseEntity.noContent().build();
@@ -60,14 +61,14 @@ public class ChatController {
 	}
 
 	@PostMapping("/unsubscribe/{chatId}")
-	@PreAuthorize("hasRole('COMPANY_USER')")
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'COMPANY_USER')")
 	public ResponseEntity<Void> unsubscribe(@PathVariable Long chatId) {
 		chatService.unsubscribeFromNotifications(chatId);
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/subscribe/{chatId}")
-	@PreAuthorize("hasRole('COMPANY_USER')")
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'COMPANY_USER')")
 	public ResponseEntity<Void> subscribe(@PathVariable Long chatId) {
 		chatService.subscribeToNotifications(chatId);
 		return ResponseEntity.ok().build();
