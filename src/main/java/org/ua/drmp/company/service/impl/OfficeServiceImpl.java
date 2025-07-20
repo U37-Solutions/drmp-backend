@@ -64,6 +64,11 @@ public class OfficeServiceImpl implements OfficeService {
 	}
 
 	@Override
+	public List<OfficeDto> fetchAllOffices() {
+		return officeRepository.findAll().stream().map(officeMapper::toDto).toList();
+	}
+
+	@Override
 	public OfficeDto createOffice(OfficeDto dto) {
 		Long companyId = dto.getCompanyId();
 		Company company = companyRepository.findById(companyId)
@@ -90,8 +95,6 @@ public class OfficeServiceImpl implements OfficeService {
 
 		return officeMapper.toDto(savedOffice);
 	}
-
-
 
 	@Override
 	@Transactional

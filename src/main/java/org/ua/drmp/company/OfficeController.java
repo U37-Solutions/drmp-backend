@@ -28,6 +28,12 @@ public class OfficeController {
 		return ResponseEntity.ok(officeService.fetchAllOfficeByCompanyId(companyId));
 	}
 
+	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
+	@GetMapping
+	public ResponseEntity<List<OfficeDto>> getAllOffices() {
+		return ResponseEntity.ok(officeService.fetchAllOffices());
+	}
+
 	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByOfficeId(authentication, #id)")
 	@GetMapping("/{id}")
 	public ResponseEntity<OfficeDto> getOffice(@PathVariable Long id) {
