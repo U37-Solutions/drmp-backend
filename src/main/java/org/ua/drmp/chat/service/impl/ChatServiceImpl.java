@@ -54,7 +54,8 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public List<ChatMessageDto> getChatHistoryByToken(String token) {
-		Chat chat = validateChatToken(token);
+		Chat chat = chatRepository.findByAccessToken(token)
+			.orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
 		return chatMessageService.getMessages(chat);
 	}
 
