@@ -13,4 +13,6 @@ public interface OfficeService {
 	OfficeDto updateOffice(Long officeId, OfficeDto dto);
 
 	void deleteOffice(Long officeId);
+
+	List<OfficeDto> fetchAllOffices();
 }
