@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.ua.drmp.company.entity.Company;
+import org.ua.drmp.company.entity.Office;
 import org.ua.drmp.company.repo.CompanyRepository;
+import org.ua.drmp.company.repo.OfficeRepository;
 import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.repo.UserRepository;
 
@@ -14,6 +16,7 @@ public class UserSecurity {
 
 	private final UserRepository userRepository;
 	private final CompanyRepository companyRepository;
+	private final OfficeRepository officeRepository;
 
 	public boolean isOwner(Authentication authentication, Long userId) {
 		String email = authentication.getName();
@@ -75,7 +78,7 @@ public class UserSecurity {
 	/**
 	 * Доступ мають ADMIN, EDITOR, COMPANY_ADMIN або COMPANY_USER
 	 */
-	public boolean isCompanyUserOrAbove(Authentication authentication, Long companyId) {
+	public boolean isCompanyUserOrAboveByCompanyId(Authentication authentication, Long companyId) {
 		String email = authentication.getName();
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
@@ -90,4 +93,23 @@ public class UserSecurity {
 			)
 			.orElse(false);
 	}
+
+	public boolean isCompanyUserOrAboveByOfficeId(Authentication authentication, Long officeId) {
+		String email = authentication.getName();
+
+		Office office = officeRepository.findById(officeId)
+			.orElseThrow(() -> new ResourceNotFoundException("Office not found"));
+
+		Company company = office.getCompany();
+
+		return userRepository.findByEmail(email)
+			.map(user ->
+				user.hasRole("ADMIN") ||
+					user.hasRole("EDITOR") ||
+					(company.getUsers().contains(user) &&
+						(user.hasRole("COMPANY_ADMIN") || user.hasRole("COMPANY_USER")))
+			)
+			.orElse(false);
+	}
+
 }

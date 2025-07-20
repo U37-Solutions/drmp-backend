@@ -22,33 +22,33 @@ public class OfficeController {
 	private final OfficeService officeService;
 
 	// ADMIN, EDITOR, COMPANY_ADMIN, COMPANY_USER
-	@PreAuthorize("@userSecurity.isCompanyUserOrAbove(authentication, #companyId)")
+	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByCompanyId(authentication, #companyId)")
 	@GetMapping("/company/{companyId}")
 	public ResponseEntity<List<OfficeDto>> getAllOfficesForCompany(@PathVariable Long companyId) {
 		return ResponseEntity.ok(officeService.fetchAllOfficeByCompanyId(companyId));
 	}
 
-	@PreAuthorize("@userSecurity.isCompanyUserOrAbove(authentication, #id)")
+	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByOfficeId(authentication, #id)")
 	@GetMapping("/{id}")
 	public ResponseEntity<OfficeDto> getOffice(@PathVariable Long id) {
 		return ResponseEntity.ok(officeService.getOffice(id));
 	}
 
-	@PreAuthorize("@userSecurity.isCompanyUserOrAbove(authentication, #companyId)")
+	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByCompanyId(authentication, #companyId)")
 	@PostMapping("/company/{companyId}")
-	public ResponseEntity<OfficeDto> createOffice(@PathVariable Long companyId,
-		@RequestBody OfficeDto dto) {
-		return ResponseEntity.ok(officeService.createOffice(companyId, dto));
+	public ResponseEntity<OfficeDto> createOffice(@PathVariable Long companyId, @RequestBody OfficeDto dto) {
+		dto.setCompanyId(companyId);
+		return ResponseEntity.ok(officeService.createOffice(dto));
 	}
 
-	@PreAuthorize("@userSecurity.isCompanyUserOrAbove(authentication, #id)")
+	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByOfficeId(authentication, #id)")
 	@PutMapping("/{id}")
 	public ResponseEntity<OfficeDto> updateOffice(@PathVariable Long id,
 		@RequestBody OfficeDto dto) {
 		return ResponseEntity.ok(officeService.updateOffice(id, dto));
 	}
 
-	@PreAuthorize("@userSecurity.isCompanyUserOrAbove(authentication, #id)")
+	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByOfficeId(authentication, #id)")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteOffice(@PathVariable Long id) {
 		officeService.deleteOffice(id);

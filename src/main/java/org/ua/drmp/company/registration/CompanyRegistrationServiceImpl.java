@@ -2,14 +2,18 @@ package org.ua.drmp.company.registration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ua.drmp.company.dto.CompanyMapper;
+import org.ua.drmp.company.dto.CustomFieldValueDto;
 import org.ua.drmp.company.dto.OfficeMapper;
+import org.ua.drmp.company.entity.CFieldValue;
 import org.ua.drmp.company.entity.Category;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.CompanyStatus;
@@ -17,6 +21,7 @@ import org.ua.drmp.company.entity.CompanyType;
 import org.ua.drmp.company.entity.Condition;
 import org.ua.drmp.company.entity.Office;
 import org.ua.drmp.company.entity.ServiceOffice;
+import org.ua.drmp.company.repo.CFieldValueRepository;
 import org.ua.drmp.company.repo.CategoryRepository;
 import org.ua.drmp.company.repo.CompanyRepository;
 import org.ua.drmp.company.repo.CompanyTypeRepository;
@@ -45,6 +50,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 	private final PasswordEncoder passwordEncoder;
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
+	private final CFieldValueRepository cFieldValueRepository;
 
 	public void registerCompany(CompanyRegisterRequest request) {
 		if (request.getOffices() == null || request.getOffices().isEmpty()) {
@@ -80,7 +86,8 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 			Set<ServiceOffice> services = new HashSet<>(serviceRepository.findAllById(o.getServiceIds()));
 			Set<Category> categories = new HashSet<>(categoryRepository.findAllById(o.getCategoryIds()));
 			Set<Condition> conditions = new HashSet<>(conditionRepository.findAllById(o.getConditionIds()));
-			Office office = officeMapper.toEntityWithoutUser(o, company, services, categories, conditions);
+			Set<CFieldValue> customFieldValues = resolveCustomFieldValues(o.getCustomFields());
+			Office office = officeMapper.toEntityWithoutUser(o, company, services, categories, conditions, customFieldValues);
 			company.getOffices().add(office);
 		});
 
@@ -164,6 +171,17 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 	private Role setCompanyAdminRole() {
 		return roleRepository.findByName(DRMPRole.COMPANY_ADMIN)
 			.orElseThrow(() -> new ResourceNotFoundException("Role COMPANY_USER not found"));
+	}
+
+	private Set<CFieldValue> resolveCustomFieldValues(List<CustomFieldValueDto> dtos) {
+		if (dtos == null || dtos.isEmpty()) {
+			return Set.of();
+		}
+
+		return dtos.stream()
+			.map(f -> cFieldValueRepository.findByStructureIdAndValue(f.getStructureId(), f.getValue())
+				.orElseThrow(() -> new ResourceNotFoundException("CFieldValue not found for structureId: " + f.getStructureId() + " and value: " + f.getValue())))
+			.collect(Collectors.toSet());
 	}
 
 }
