@@ -1,6 +1,7 @@
 package org.ua.drmp.company.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -66,7 +67,7 @@ public class Office {
 		inverseJoinColumns = @JoinColumn(name = "condition_id"))
 	private Set<Condition> conditions = new HashSet<>();
 
-	@OneToMany(mappedBy = "office")
+	@OneToMany(mappedBy = "office", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OfficeCFieldValue> customFieldValues = new ArrayList<>();
 
 	@ManyToMany

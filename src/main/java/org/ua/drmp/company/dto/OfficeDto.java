@@ -1,5 +1,6 @@
 package org.ua.drmp.company.dto;
 
+import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +26,5 @@ public class OfficeDto {
 	private Set<Long> serviceIds;
 	private Set<Long> categoryIds;
 	private Set<Long> conditionIds;
+	private List<CustomFieldValueDto> customFields;
 }

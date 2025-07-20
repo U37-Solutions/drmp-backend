@@ -8,7 +8,7 @@ public interface OfficeService {
 	List<OfficeDto> fetchAllOfficeByCompanyId(Long companyId);
 	OfficeDto getOffice(Long officeId);
 
-	OfficeDto createOffice(Long companyId, OfficeDto dto);
+	OfficeDto createOffice(OfficeDto dto);
 
 	OfficeDto updateOffice(Long officeId, OfficeDto dto);
 
