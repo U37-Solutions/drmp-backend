@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 public class OfficeDto {
 	private Long id;
 	private String workSchedule;
-	private String donorSupport;
 	private String additionalDescription;
 	private String locationName;
 	private Double latitude;
