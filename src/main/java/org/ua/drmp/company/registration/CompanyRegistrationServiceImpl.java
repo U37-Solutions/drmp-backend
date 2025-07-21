@@ -102,7 +102,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-		if (company.getUsers() != null && !company.getUsers().isEmpty()) {
+		if (!company.getUsers().isEmpty()) {
 			throw new BadRequestException("Company already approved");
 		}
 
@@ -122,6 +122,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 			.lastName(lastName)
 			.password(encodedPassword)
 			.roles(Set.of(setCompanyAdminRole()))
+			.company(company)
 			.build();
 
 		try {
@@ -130,7 +131,6 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 			throw new BadRequestException("User with this email already exists");
 		}
 
-		company.getUsers().add(user);
 		company.setStatus(CompanyStatus.ACTIVE);
 		companyRepository.save(company);
 

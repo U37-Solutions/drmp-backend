@@ -3,6 +3,7 @@ package org.ua.drmp.service;
 import java.util.List;
 import org.ua.drmp.dto.ChangePasswordRequest;
 import org.ua.drmp.dto.ConfirmRegistrationRequest;
+import org.ua.drmp.dto.InviteCompanyUserRequest;
 import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
@@ -19,6 +20,8 @@ public interface UserService {
 
 	User fetchByEmail(String email);
 
+	List<UserResponse> fetchUsersByCompanyId(Long companyId);
+
 	UserResponse fetchUserById(Long id);
 
 	void updateUser(Long id, UserRequest request);
@@ -28,6 +31,8 @@ public interface UserService {
 	UserSessionResponse sessionInfo();
 
 	void inviteUser(InviteUserRequest request);
+
+	void inviteCompanyUser(InviteCompanyUserRequest request);
 
 	InviteUserRequest getTemporaryUserData(String token);
 

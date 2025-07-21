@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
@@ -48,9 +49,10 @@ public class User {
 		inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
 
-	@ManyToMany(mappedBy = "users")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "company_id")
 	@JsonIgnore
-	private Set<Company> companies = new HashSet<>();
+	private Company company;
 
 
 	public boolean hasRole(String roleName) {

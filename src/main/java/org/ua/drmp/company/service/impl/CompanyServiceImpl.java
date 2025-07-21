@@ -84,7 +84,7 @@ public class CompanyServiceImpl implements CompanyService {
 		Set<User> linkedUsers = company.getUsers();
 
 		for (User user : linkedUsers) {
-			user.getCompanies().remove(company);
+			user.setCompany(null);
 			tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(user.getId()));
 			userRepository.delete(user);
 		}

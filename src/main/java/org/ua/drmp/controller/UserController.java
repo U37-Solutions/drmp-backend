@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.ua.drmp.dto.ChangePasswordRequest;
 import org.ua.drmp.dto.ConfirmRegistrationRequest;
+import org.ua.drmp.dto.InviteCompanyUserRequest;
 import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
@@ -53,6 +54,13 @@ public class UserController {
 	public UserResponse fetchUserById(@PathVariable("id") Long id) {
 		return userService.fetchUserById(id);
 	}
+
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'ADMIN', 'EDITOR')")
+	@GetMapping(USERS_ENDPOINT + "/company/{companyId}")
+	public List<UserResponse> fetchUserByCompanyId(@PathVariable("companyId") Long companyId) {
+		return userService.fetchUsersByCompanyId(companyId);
+	}
+
 
 	// ADMIN, або власник (COMPANY_ADMIN або COMPANY_USER самого себе)
 	@ApiError404
@@ -99,6 +107,13 @@ public class UserController {
 	@PostMapping("/confirm-registration")
 	public ResponseEntity<?> confirmRegistration(@RequestBody ConfirmRegistrationRequest request) {
 		userService.confirmRegistration(request);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/invite-company-user")
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN')")
+	public ResponseEntity<?> inviteCompanyUser(@RequestBody InviteCompanyUserRequest request) {
+		userService.inviteCompanyUser(request);
 		return ResponseEntity.ok().build();
 	}
 }
