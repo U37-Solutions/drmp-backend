@@ -10,8 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -53,12 +51,7 @@ public class Company {
 	@JoinColumn(name = "company_type_id")
 	private CompanyType companyType;
 
-	@ManyToMany
-	@JoinTable(
-		name = "company_users",
-		joinColumns = @JoinColumn(name = "company_id"),
-		inverseJoinColumns = @JoinColumn(name = "user_id")
-	)
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private Set<User> users = new HashSet<>();
 

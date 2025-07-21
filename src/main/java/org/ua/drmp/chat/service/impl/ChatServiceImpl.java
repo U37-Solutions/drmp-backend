@@ -90,11 +90,11 @@ public class ChatServiceImpl implements ChatService {
 		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
 
-		List<Long> companyIds = user.getCompanies().stream()
+		Long companyId = Optional.ofNullable(user.getCompany())
 			.map(Company::getId)
-			.toList();
+			.orElseThrow(() -> new ResourceNotFoundException("Company not assigned to user"));
 
-		return chatRepository.findActiveChatsByCompanyIds(companyIds)
+		return chatRepository.findActiveChatsByCompanyId(companyId)
 			.stream()
 			.map(this::mapToDto)
 			.toList();
@@ -105,11 +105,11 @@ public class ChatServiceImpl implements ChatService {
 		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
 
-		List<Long> companyIds = user.getCompanies().stream()
+		Long companyId = Optional.ofNullable(user.getCompany())
 			.map(Company::getId)
-			.toList();
+			.orElseThrow(() -> new ResourceNotFoundException("Company not assigned to user"));
 
-		return chatRepository.findTop50ArchivedChatsByCompanyIds(companyIds)
+		return chatRepository.findTop50ArchivedChatsByCompanyId(companyId)
 			.stream()
 			.map(this::mapToDto)
 			.toList();

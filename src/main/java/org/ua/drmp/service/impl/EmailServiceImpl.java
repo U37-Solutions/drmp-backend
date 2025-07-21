@@ -104,6 +104,15 @@ public class EmailServiceImpl implements EmailService {
 		sendHtmlEmail(to, "Реєстрацію компанії відхилено", html);
 	}
 
+	@Override
+	public void sendInviteForCompanyUser(String email, String password) {
+		Context context = new Context();
+		context.setVariable("email", email);
+		context.setVariable("password", password);
+		String html = templateEngine.process("invite-company-user.html", context);
+		sendHtmlEmail(email, INVITE_SUBJECT, html);
+	}
+
 	private void sendHtmlEmail(String to, String subject, String htmlContent) {
 		try {
 			MimeMessage mimeMessage = mailSender.createMimeMessage();

@@ -12,11 +12,11 @@ import org.ua.drmp.chat.entity.Chat;
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 	Optional<Chat> findByAccessToken(String accessToken);
-	@Query("SELECT c FROM Chat c WHERE c.company.id IN :companyIds AND c.archived = false")
-	List<Chat> findActiveChatsByCompanyIds(@Param("companyIds") List<Long> companyIds);
+	@Query("SELECT c FROM Chat c WHERE c.company.id = :companyId AND c.archived = false")
+	List<Chat> findActiveChatsByCompanyId(@Param("companyId") Long companyId);
 
-	@Query("SELECT c FROM Chat c WHERE c.company.id IN :companyIds AND c.archived = true ORDER BY c.expiresAt DESC")
-	List<Chat> findTop50ArchivedChatsByCompanyIds(@Param("companyIds") List<Long> companyIds);
+	@Query("SELECT c FROM Chat c WHERE c.company.id = :companyId AND c.archived = true ORDER BY c.expiresAt DESC")
+	List<Chat> findTop50ArchivedChatsByCompanyId(@Param("companyId") Long companyId);
 
 	List<Chat> findByArchivedFalseAndExpiresAtBefore(Instant now); // for scheduler
 }

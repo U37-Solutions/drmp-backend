@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.dto.ChangePasswordRequest;
 import org.ua.drmp.dto.ConfirmRegistrationRequest;
+import org.ua.drmp.dto.InviteCompanyUserRequest;
 import org.ua.drmp.dto.InviteUserRequest;
 import org.ua.drmp.dto.UserRequest;
 import org.ua.drmp.dto.UserResponse;
@@ -79,6 +81,19 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<UserResponse> fetchUsersByCompanyId(Long companyId) {
+		List<User> users = userRepository.findAllByCompany_Id(companyId);
+		return users.stream()
+			.map(user -> new UserResponse(
+				user.getId(),
+				user.getEmail(),
+				user.getFirstName(),
+				user.getLastName()
+			))
+			.toList();
+	}
+
+	@Override
 	public UserResponse fetchUserById(Long id) {
 		return mapToResponse(userRepository.findById(id)
 			.orElseThrow(() -> new UserNotFoundException("User not found")));
@@ -125,10 +140,14 @@ public class UserServiceImpl implements UserService {
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
 		DRMPRole drmpRole = user.getRoles().stream().findFirst()
 			.orElseThrow(() -> new ResourceNotFoundException("Role not found")).getName();
+
 		Long companyId = null;
 		if (drmpRole == DRMPRole.COMPANY_ADMIN || drmpRole == DRMPRole.COMPANY_USER) {
-			companyId = user.getCompanies().stream().findFirst()
-				.orElseThrow(() -> new ResourceNotFoundException("Company not found")).getId();
+			Company company = user.getCompany();
+			if (company == null) {
+				throw new ResourceNotFoundException("Company not assigned to user");
+			}
+			companyId = company.getId();
 		}
 		return new UserSessionResponse(
 			user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), drmpRole, companyId
@@ -144,6 +163,25 @@ public class UserServiceImpl implements UserService {
 
 		String token = inviteTokenService.createInviteToken(request);
 		emailService.sendInviteUserEmail(request.email(), token);
+	}
+
+	@Override
+	public void inviteCompanyUser(InviteCompanyUserRequest request) {
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		User companyAdmin = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
+		User user = new User();
+		Role role = roleRepository.findByName(DRMPRole.COMPANY_USER)
+			.orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+		user.setEmail(request.email());
+		user.setFirstName(request.firstName());
+		user.setLastName(request.lastName());
+		user.setPassword(passwordEncoder.encode(request.password()));
+		user.setRoles(Set.of(role));
+		user.setCompany(companyAdmin.getCompany());
+
+		userRepository.save(user);
+		emailService.sendInviteForCompanyUser(request.email(), request.password());
 	}
 
 	@Override

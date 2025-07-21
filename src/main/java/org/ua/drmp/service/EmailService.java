@@ -17,4 +17,6 @@ public interface EmailService {
 	void sendAccountCredentialsEmail(String to, String rawPassword);
 
 	void sendCompanyRejectionEmail(String to, String companyName, String reason, String contactEmail);
+
+	void sendInviteForCompanyUser(String email, String password);
 }
