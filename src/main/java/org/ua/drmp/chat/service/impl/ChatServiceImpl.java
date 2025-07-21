@@ -43,7 +43,8 @@ public class ChatServiceImpl implements ChatService {
 
 		Chat chat = new Chat();
 		chat.setAccessToken(UUID.randomUUID().toString());
-		chat.setExpiresAt(Instant.now().plus(2, ChronoUnit.DAYS));
+		// chat.setExpiresAt(Instant.now().plus(2, ChronoUnit.DAYS));
+		chat.setExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES)); // 30 хв
 		chat.setCompany(company);
 		chat = chatRepository.save(chat);
 
