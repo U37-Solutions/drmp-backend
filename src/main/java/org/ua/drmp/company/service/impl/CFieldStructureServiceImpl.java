@@ -42,9 +42,12 @@ public class CFieldStructureServiceImpl implements CFieldStructureService {
 	@Override
 	@Transactional
 	public CFieldStructureDto update(Long id, CFieldStructureDto dto) {
-		titleValidation(dto.getTitle());
 		CFieldStructure existing = repository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("CFieldStructure not found"));
+
+		if (!StringUtils.equals(existing.getTitle(), dto.getTitle())) {
+			titleValidation(dto.getTitle());
+		}
 
 		existing.setTitle(dto.getTitle());
 		existing.setPlaceholder(dto.getPlaceholder());
@@ -52,7 +55,6 @@ public class CFieldStructureServiceImpl implements CFieldStructureService {
 		existing.setRequired(dto.getRequired());
 		existing.setType(dto.getType());
 
-		// якщо type == SELECT -> оновлюємо options, інакше null
 		if (dto.getType() == CFieldStructureType.SELECT) {
 			existing.setOptions(dto.getOptions());
 		} else {
@@ -61,7 +63,6 @@ public class CFieldStructureServiceImpl implements CFieldStructureService {
 
 		return mapper.toDto(repository.save(existing));
 	}
-
 
 	@Override
 	public void delete(Long id) {
