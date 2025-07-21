@@ -2,6 +2,7 @@ package org.ua.drmp.company.service.impl;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.ua.drmp.company.dto.CFieldStructureDto;
@@ -10,6 +11,7 @@ import org.ua.drmp.company.entity.CFieldStructure;
 import org.ua.drmp.company.entity.CFieldStructureType;
 import org.ua.drmp.company.repo.CFieldStructureRepository;
 import org.ua.drmp.company.service.CFieldStructureService;
+import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.exception.ResourceNotFoundException;
 
 @Service
@@ -33,12 +35,14 @@ public class CFieldStructureServiceImpl implements CFieldStructureService {
 
 	@Override
 	public CFieldStructureDto create(CFieldStructureDto dto) {
+		titleValidation(dto.getTitle());
 		return mapper.toDto(repository.save(mapper.toEntity(dto)));
 	}
 
 	@Override
 	@Transactional
 	public CFieldStructureDto update(Long id, CFieldStructureDto dto) {
+		titleValidation(dto.getTitle());
 		CFieldStructure existing = repository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("CFieldStructure not found"));
 
@@ -65,5 +69,16 @@ public class CFieldStructureServiceImpl implements CFieldStructureService {
 			throw new ResourceNotFoundException("CFieldStructure not found");
 		}
 		repository.deleteById(id);
+	}
+
+	private void titleValidation(String title) {
+		List<CFieldStructure> fieldStructureList = repository.findAll();
+
+		boolean titleExists = fieldStructureList.stream()
+			.anyMatch(field -> StringUtils.equals(field.getTitle(), title));
+
+		if (titleExists) {
+			throw new BadRequestException("Field with this title already exists");
+		}
 	}
 }
