@@ -9,8 +9,6 @@ public interface FeedbackService {
 
 	List<FeedbackViewDto> fetchAll();
 
-	FeedbackViewDto fetchById(Long id);
-
 	void delete(Long id);
 
 	void assignCompany(Long id, @Valid AssignCompanyRequest request);

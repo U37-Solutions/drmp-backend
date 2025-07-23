@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/feedback")
+@RequestMapping("/feedbacks")
 @RequiredArgsConstructor
 public class FeedbackController {
 	private final FeedbackService feedbackService;
@@ -27,22 +27,16 @@ public class FeedbackController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN', 'COMPANY_USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
 	public ResponseEntity<List<FeedbackViewDto>> getAll() {
 		return ResponseEntity.ok(feedbackService.fetchAll());
 	}
 
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN', 'COMPANY_USER')")
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		feedbackService.delete(id);
 		return ResponseEntity.noContent().build();
-	}
-
-	@GetMapping("/{id}")
-	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
-	public ResponseEntity<FeedbackViewDto> fetchById (@PathVariable Long id) {
-		return ResponseEntity.ok(feedbackService.fetchById(id));
 	}
 
 	@GetMapping("/companies/{companyId}")
