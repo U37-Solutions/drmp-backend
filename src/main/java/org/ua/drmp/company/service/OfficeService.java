@@ -2,11 +2,12 @@ package org.ua.drmp.company.service;
 
 import java.util.List;
 import org.ua.drmp.company.dto.OfficeDto;
+import org.ua.drmp.company.dto.OfficeViewDto;
 
 public interface OfficeService {
 
-	List<OfficeDto> fetchAllOfficeByCompanyId(Long companyId);
-	OfficeDto getOffice(Long officeId);
+	List<OfficeViewDto> fetchAllOfficeByCompanyId(Long companyId);
+	OfficeViewDto getOffice(Long officeId);
 
 	OfficeDto createOffice(OfficeDto dto);
 
@@ -14,5 +15,5 @@ public interface OfficeService {
 
 	void deleteOffice(Long officeId);
 
-	List<OfficeDto> fetchAllOffices();
+	List<OfficeViewDto> fetchAllOffices();
 }

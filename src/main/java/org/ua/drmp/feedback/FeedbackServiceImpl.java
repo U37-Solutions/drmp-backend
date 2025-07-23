@@ -11,6 +11,7 @@ import org.ua.drmp.exception.ResourceNotFoundException;
 public class FeedbackServiceImpl implements FeedbackService{
 	private final FeedbackRepository feedbackRepository;
 	private final CompanyRepository companyRepository;
+	private final FeedbackMapper feedbackMapper;
 	@Override
 	public void createFeedback(FeedbackRequest request) {
 		feedbackRepository.save(Feedback.builder()
@@ -21,14 +22,17 @@ public class FeedbackServiceImpl implements FeedbackService{
 	}
 
 	@Override
-	public List<Feedback> fetchAll() {
-		return feedbackRepository.findAll();
+	public List<FeedbackViewDto> fetchAll() {
+		return feedbackRepository.findAll().stream()
+			.map(feedbackMapper::toViewDto)
+			.toList();
 	}
 
 	@Override
-	public Feedback fetchById(Long id) {
-		return feedbackRepository.findById(id)
+	public FeedbackViewDto fetchById(Long id) {
+		Feedback feedback = feedbackRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Feedback not found"));
+		return feedbackMapper.toViewDto(feedback);
 	}
 
 	@Override
@@ -44,5 +48,12 @@ public class FeedbackServiceImpl implements FeedbackService{
 		companyRepository.findById(request.companyId()).orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 		feedback.setCompanyId(request.companyId());
 		feedbackRepository.save(feedback);
+	}
+
+	@Override
+	public List<FeedbackViewDto> fetchAllByCompanyId(Long companyId) {
+		return feedbackRepository.findAllByCompanyId(companyId).stream()
+			.map(feedbackMapper::toViewDto)
+			.toList();
 	}
 }

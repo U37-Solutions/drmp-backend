@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.ua.drmp.company.dto.OfficeDto;
+import org.ua.drmp.company.dto.OfficeViewDto;
 import org.ua.drmp.company.service.OfficeService;
 
 @RestController
@@ -24,19 +25,19 @@ public class OfficeController {
 	// ADMIN, EDITOR, COMPANY_ADMIN, COMPANY_USER
 	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByCompanyId(authentication, #companyId)")
 	@GetMapping("/company/{companyId}")
-	public ResponseEntity<List<OfficeDto>> getAllOfficesForCompany(@PathVariable Long companyId) {
+	public ResponseEntity<List<OfficeViewDto>> getAllOfficesForCompany(@PathVariable Long companyId) {
 		return ResponseEntity.ok(officeService.fetchAllOfficeByCompanyId(companyId));
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
 	@GetMapping
-	public ResponseEntity<List<OfficeDto>> getAllOffices() {
+	public ResponseEntity<List<OfficeViewDto>> getAllOffices() {
 		return ResponseEntity.ok(officeService.fetchAllOffices());
 	}
 
 	@PreAuthorize("@userSecurity.isCompanyUserOrAboveByOfficeId(authentication, #id)")
 	@GetMapping("/{id}")
-	public ResponseEntity<OfficeDto> getOffice(@PathVariable Long id) {
+	public ResponseEntity<OfficeViewDto> getOffice(@PathVariable Long id) {
 		return ResponseEntity.ok(officeService.getOffice(id));
 	}
 

@@ -59,4 +59,16 @@ public class User {
 		return roles.stream()
 			.anyMatch(role -> role.getName().name().equalsIgnoreCase(roleName));
 	}
+
+	@Override
+	public String toString() {
+		return "User{" +
+			"id=" + id +
+			", email='" + email + '\'' +
+			", firstName='" + firstName + '\'' +
+			", lastName='" + lastName + '\'' +
+			", roles=" + roles.stream().map(r -> r.getName().name()).toList() +
+			'}';
+	}
+
 }

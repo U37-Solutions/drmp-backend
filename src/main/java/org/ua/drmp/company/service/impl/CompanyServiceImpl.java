@@ -18,6 +18,7 @@ import org.ua.drmp.company.service.CompanyService;
 import org.ua.drmp.entity.User;
 import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.exception.UserNotFoundException;
+import org.ua.drmp.logging.ChangeLogService;
 import org.ua.drmp.repo.TokenRepository;
 import org.ua.drmp.repo.UserRepository;
 
@@ -29,6 +30,7 @@ public class CompanyServiceImpl implements CompanyService {
 	private final CompanyTypeRepository companyTypeRepository;
 	private final UserRepository userRepository;
 	private final TokenRepository tokenRepository;
+	private final ChangeLogService changelogService;
 
 	@Override
 	public List<CompanyDto> fetchAllCompanies() {
@@ -54,6 +56,7 @@ public class CompanyServiceImpl implements CompanyService {
 	public CompanyDto updateCompany(Long companyId, CompanyDto dto) {
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+		Company oldCompany = companyMapper.toEntity(companyMapper.toDto(company), company.getCompanyType(), company.getUsers());
 
 		CompanyType type = companyTypeRepository.findById(dto.getCompanyTypeId())
 			.orElseThrow(() -> new ResourceNotFoundException("CompanyType not found"));
@@ -69,10 +72,14 @@ public class CompanyServiceImpl implements CompanyService {
 		company.setCompanyType(type);
 
 		company.getSocials().clear();
-		dto.getSocials().forEach(s -> company.getSocials()
-			.add(companyMapper.toSocialEntity(s, company)));
+		dto.getSocials().forEach(s -> company.getSocials().add(companyMapper.toSocialEntity(s, company)));
 
-		return companyMapper.toDto(companyRepository.save(company));
+		Company updated = companyRepository.save(company);
+
+		String email = getUser().getEmail();
+		changelogService.logCompanyChange(companyId, email, "update", oldCompany, updated);
+
+		return companyMapper.toDto(updated);
 	}
 
 	@Override
@@ -83,6 +90,8 @@ public class CompanyServiceImpl implements CompanyService {
 
 		Set<User> linkedUsers = company.getUsers();
 
+		String email = getUser().getEmail();
+		changelogService.logCompanyChange(companyId, email, "delete", company, null);
 		for (User user : linkedUsers) {
 			user.setCompany(null);
 			tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(user.getId()));
@@ -97,24 +106,34 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public void createCompany(CompanyDto companyDto) {
 		User user = getUser();
+
 		CompanyType type = companyTypeRepository.findById(companyDto.getCompanyTypeId())
 			.orElseThrow(() -> new ResourceNotFoundException("CompanyType not found"));
+
 		Company company = new Company();
 		company.setName(companyDto.getName());
 		company.setCode(companyDto.getCode());
 		company.setContactName(companyDto.getContactName());
-		company.setOwnershipType(company.getOwnershipType());
-		company.setDonorSupport(company.getDonorSupport());
+		company.setOwnershipType(companyDto.getOwnershipType());
+		company.setDonorSupport(companyDto.getDonorSupport());
 		company.setPhone(companyDto.getPhone());
 		company.setEmail(companyDto.getEmail());
 		company.setStatus(CompanyStatus.valueOf(companyDto.getStatus()));
 		company.setCompanyType(type);
 		company.setUsers(Set.of(user));
-		company.getSocials().clear();
-		companyDto.getSocials().forEach(s -> company.getSocials()
-			.add(companyMapper.toSocialEntity(s, company)));
 
-		companyMapper.toDto(companyRepository.save(company));
+		companyDto.getSocials().forEach(s -> company.getSocials().add(companyMapper.toSocialEntity(s, company)));
+
+		Company saved = companyRepository.save(company);
+
+		String email = user.getEmail();
+		changelogService.logCompanyChange(
+			saved.getId(),
+			email,
+			"create",
+			null,
+			company
+		);
 	}
 
 	private User getUser() {

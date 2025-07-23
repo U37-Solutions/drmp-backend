@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ua.drmp.company.dto.CompanyMapper;
@@ -32,6 +33,7 @@ import org.ua.drmp.entity.Role;
 import org.ua.drmp.entity.User;
 import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.exception.ResourceNotFoundException;
+import org.ua.drmp.logging.ChangeLogService;
 import org.ua.drmp.repo.RoleRepository;
 import org.ua.drmp.repo.UserRepository;
 import org.ua.drmp.service.EmailService;
@@ -51,6 +53,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
 	private final CFieldValueRepository cFieldValueRepository;
+	private final ChangeLogService changelogService;
 
 	public void registerCompany(CompanyRegisterRequest request) {
 		if (request.getOffices() == null || request.getOffices().isEmpty()) {
@@ -126,13 +129,28 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 			.build();
 
 		try {
+			changelogService.logUserChange(
+				SecurityContextHolder.getContext().getAuthentication().getName(),
+				"create",
+				null,
+				user
+			);
 			userRepository.save(user);
 		} catch (DataIntegrityViolationException ex) {
 			throw new BadRequestException("User with this email already exists");
 		}
 
 		company.setStatus(CompanyStatus.ACTIVE);
-		companyRepository.save(company);
+		Company savedCompany = companyRepository.save(company);
+
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		changelogService.logCompanyChange(
+			savedCompany.getId(),
+			email,
+			"create",
+			null,
+			savedCompany
+		);
 
 		emailService.sendAccountCredentialsEmail(user.getEmail(), rawPassword);
 	}
