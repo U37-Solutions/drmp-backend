@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface FeedbackService {
 	void createFeedback(@RequestBody @Valid FeedbackRequest request);
 
-	List<Feedback> fetchAll();
+	List<FeedbackViewDto> fetchAll();
 
-	Feedback fetchById(Long id);
+	FeedbackViewDto fetchById(Long id);
 
 	void delete(Long id);
 
 	void assignCompany(Long id, @Valid AssignCompanyRequest request);
+
+	List<FeedbackViewDto> fetchAllByCompanyId(Long companyId);
 }

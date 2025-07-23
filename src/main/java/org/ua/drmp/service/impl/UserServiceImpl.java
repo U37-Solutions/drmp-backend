@@ -22,6 +22,7 @@ import org.ua.drmp.exception.ForbiddenOperationException;
 import org.ua.drmp.exception.InvalidPasswordException;
 import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.exception.UserNotFoundException;
+import org.ua.drmp.logging.ChangeLogService;
 import org.ua.drmp.repo.RoleRepository;
 import org.ua.drmp.repo.TokenRepository;
 import org.ua.drmp.repo.UserRepository;
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
 	private final TokenRepository tokenRepository;
 	private final EmailService emailService;
 	private final InviteTokenService inviteTokenService;
+	private final ChangeLogService changelogService;
 
 	@Override
 	public void changePassword(ChangePasswordRequest changePasswordRequest) {
@@ -103,7 +105,10 @@ public class UserServiceImpl implements UserService {
 	public void updateUser(Long id, UserRequest request) {
 		User user = userRepository.findById(id)
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
-
+		User oldUser = User.builder()
+			.email(user.getEmail())
+			.lastName(user.getLastName())
+			.firstName(user.getFirstName()).build();
 		String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 		if (!user.getEmail().equals(currentEmail)) {
 			throw new ForbiddenOperationException("You are not allowed to update this user");
@@ -122,15 +127,28 @@ public class UserServiceImpl implements UserService {
 			user.setLastName(request.lastName());
 		}
 		userRepository.save(user);
+
+			changelogService.logUserChange(
+				currentEmail,
+				"update",
+				oldUser,
+				user
+			);
 	}
 
 	@Override
 	public void deleteUserById(Long id) {
-		if (!userRepository.existsById(id)) {
-			throw new UserNotFoundException("User not found");
-		}
+		User user = userRepository.findById(id)
+			.orElseThrow(() -> new UserNotFoundException("User not found"));
 		tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(id));
 		userRepository.deleteById(id);
+
+		changelogService.logUserChange(
+			SecurityContextHolder.getContext().getAuthentication().getName(),
+			"delete",
+			user,
+			null
+		);
 	}
 
 	@Override
@@ -170,6 +188,9 @@ public class UserServiceImpl implements UserService {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		User companyAdmin = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserNotFoundException("User not found"));
+		if (userRepository.existsByEmail(request.email())) {
+			throw new BadRequestException("User with email " + request.email() + " already exists");
+		}
 		User user = new User();
 		Role role = roleRepository.findByName(DRMPRole.COMPANY_USER)
 			.orElseThrow(() -> new ResourceNotFoundException("Role not found"));
@@ -181,6 +202,12 @@ public class UserServiceImpl implements UserService {
 		user.setCompany(companyAdmin.getCompany());
 
 		userRepository.save(user);
+		changelogService.logUserChange(
+			SecurityContextHolder.getContext().getAuthentication().getName(),
+			"create",
+			null,
+			user
+		);
 		emailService.sendInviteForCompanyUser(request.email(), request.password());
 	}
 
@@ -218,6 +245,13 @@ public class UserServiceImpl implements UserService {
 		inviteTokenService.invalidateInviteToken(request.token());
 
 		emailService.sendSuccessfulRegistrationEmail(user.getEmail());
+
+		changelogService.logUserChange(
+			SecurityContextHolder.getContext().getAuthentication().getName(),
+			"create",
+			null,
+			user
+		);
 	}
 
 	private UserResponse mapToResponse(User user) {

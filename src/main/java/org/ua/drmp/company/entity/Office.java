@@ -75,5 +75,32 @@ public class Office {
 		joinColumns = @JoinColumn(name = "office_id"),
 		inverseJoinColumns = @JoinColumn(name = "user_id"))
 	private Set<User> users = new HashSet<>();
+
+	@Override
+	public String toString() {
+		return "Office{" +
+			"locationName='" + locationName + '\'' +
+			", workSchedule='" + workSchedule + '\'' +
+			", additionalDescription='" + additionalDescription + '\'' +
+			", latitude=" + latitude +
+			", longitude=" + longitude +
+			", regionId=" + regionId +
+			", company=" + (company != null ? company.getName() : null) +
+			", user=" + (user != null ? user.getEmail() : null) +
+			", services=" + services.stream()
+			.map(s -> s.getName() != null ? s.getName() : "unknown")
+			.toList() +
+			", categories=" + categories.stream()
+			.map(c -> c.getName() != null ? c.getName() : "unknown")
+			.toList() +
+			", conditions=" + conditions.stream()
+			.map(c -> c.getName() != null ? c.getName() : "unknown")
+			.toList() +
+			", customFieldValues=" + customFieldValues.stream()
+			.map(v -> v.getValue() != null ? v.getValue().getValue() : "unknown")
+			.toList() +
+			'}';
+	}
+
 }
 

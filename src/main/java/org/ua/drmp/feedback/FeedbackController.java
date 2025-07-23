@@ -28,7 +28,7 @@ public class FeedbackController {
 
 	@GetMapping
 	@PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN', 'COMPANY_USER')")
-	public ResponseEntity<List<Feedback>> getAll() {
+	public ResponseEntity<List<FeedbackViewDto>> getAll() {
 		return ResponseEntity.ok(feedbackService.fetchAll());
 	}
 
@@ -40,13 +40,20 @@ public class FeedbackController {
 	}
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_ADMIN', 'COMPANY_USER')")
-	public ResponseEntity<Feedback> fetchById (@PathVariable Long id) {
+	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
+	public ResponseEntity<FeedbackViewDto> fetchById (@PathVariable Long id) {
 		return ResponseEntity.ok(feedbackService.fetchById(id));
 	}
 
+	@GetMapping("/companies/{companyId}")
+	@PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'COMPANY_USER')")
+	public List<FeedbackViewDto> getFeedbacksByCompanyId(@PathVariable Long companyId) {
+		return feedbackService.fetchAllByCompanyId(companyId);
+	}
+
+
 	@PutMapping("/{id}/assign-company")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
 	public ResponseEntity<Void> assignCompany(@PathVariable Long id, @RequestBody @Valid AssignCompanyRequest request) {
 		feedbackService.assignCompany(id, request);
 

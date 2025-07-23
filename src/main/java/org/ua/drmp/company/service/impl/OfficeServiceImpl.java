@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.ua.drmp.company.dto.CustomFieldValueDto;
 import org.ua.drmp.company.dto.OfficeDto;
 import org.ua.drmp.company.dto.OfficeMapper;
+import org.ua.drmp.company.dto.OfficeViewDto;
 import org.ua.drmp.company.entity.CFieldStructure;
 import org.ua.drmp.company.entity.CFieldStructureType;
 import org.ua.drmp.company.entity.CFieldValue;
@@ -31,6 +33,7 @@ import org.ua.drmp.company.repo.OfficeRepository;
 import org.ua.drmp.company.repo.ServiceRepository;
 import org.ua.drmp.company.service.OfficeService;
 import org.ua.drmp.exception.ResourceNotFoundException;
+import org.ua.drmp.logging.ChangeLogService;
 
 @Service
 @RequiredArgsConstructor
@@ -45,27 +48,29 @@ public class OfficeServiceImpl implements OfficeService {
 	private final CFieldValueRepository cFieldValueRepository;
 	private final CFieldStructureRepository cFieldStructureRepository;
 	private final OfficeCFieldValueRepository officeCFieldValueRepository;
+	private final ChangeLogService changelogService;
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Override
-	public List<OfficeDto> fetchAllOfficeByCompanyId(Long companyId) {
+	public List<OfficeViewDto> fetchAllOfficeByCompanyId(Long companyId) {
 		return officeRepository.findAllByCompanyId(companyId).stream()
-			.map(officeMapper::toDto)
+			.map(officeMapper::toViewDto)
 			.toList();
 	}
 
 	@Override
-	public OfficeDto getOffice(Long officeId) {
-		return officeMapper.toDto(
-			officeRepository.findById(officeId)
-				.orElseThrow(() -> new ResourceNotFoundException("Office not found"))
-		);
+	public OfficeViewDto getOffice(Long officeId) {
+		Office office = officeRepository.findById(officeId)
+			.orElseThrow(() -> new ResourceNotFoundException("Office not found"));
+		return officeMapper.toViewDto(office);
 	}
 
 	@Override
-	public List<OfficeDto> fetchAllOffices() {
-		return officeRepository.findAll().stream().map(officeMapper::toDto).toList();
+	public List<OfficeViewDto> fetchAllOffices() {
+		return officeRepository.findAll().stream()
+			.map(officeMapper::toViewDto)
+			.toList();
 	}
 
 	@Override
@@ -87,20 +92,37 @@ public class OfficeServiceImpl implements OfficeService {
 				.office(savedOffice)
 				.value(cf)
 				.build())
-			.collect(Collectors.toList());
-
+			.toList();
 		officeCFieldValueRepository.saveAll(officeCFieldValues);
-
 		savedOffice.setCustomFieldValues(officeCFieldValues);
+
+		changelogService.logOfficeChange(
+			savedOffice.getId(),
+			getCurrentUserEmail(),
+			"create",
+			null,
+			savedOffice
+		);
 
 		return officeMapper.toDto(savedOffice);
 	}
+
 
 	@Override
 	@Transactional
 	public OfficeDto updateOffice(Long officeId, OfficeDto dto) {
 		Office existingOffice = officeRepository.findById(officeId)
 			.orElseThrow(() -> new ResourceNotFoundException("Office not found with id: " + officeId));
+		Office oldOffice = officeMapper.toEntityWithoutUser(
+			dtoFromExistingOffice(existingOffice),
+			existingOffice.getCompany(),
+			existingOffice.getServices(),
+			existingOffice.getCategories(),
+			existingOffice.getConditions(),
+			existingOffice.getCustomFieldValues().stream()
+				.map(OfficeCFieldValue::getValue)
+				.collect(Collectors.toSet())
+		);
 
 		if (dto.getCompanyId() == null) {
 			throw new ResourceNotFoundException("CompanyId must not be null");
@@ -144,11 +166,39 @@ public class OfficeServiceImpl implements OfficeService {
 		// 3. Сетнути нові значення (не обов'язково, якщо не використовуєш далі)
 		savedOffice.setCustomFieldValues(newLinks);
 
+		changelogService.logOfficeChange(
+			savedOffice.getId(),
+			getCurrentUserEmail(),
+			"update",
+			oldOffice,
+			savedOffice
+		);
+
 		return officeMapper.toDto(savedOffice);
 	}
 
-	@Transactional
+	private OfficeDto dtoFromExistingOffice(Office office) {
+		return OfficeDto.builder()
+			.id(office.getId())
+			.locationName(office.getLocationName())
+			.workSchedule(office.getWorkSchedule())
+			.additionalDescription(office.getAdditionalDescription())
+			.latitude(office.getLatitude())
+			.longitude(office.getLongitude())
+			.regionId(office.getRegionId())
+			.companyId(office.getCompany().getId())
+			.serviceIds(office.getServices().stream().map(ServiceOffice::getId).collect(Collectors.toSet()))
+			.categoryIds(office.getCategories().stream().map(Category::getId).collect(Collectors.toSet()))
+			.conditionIds(office.getConditions().stream().map(Condition::getId).collect(Collectors.toSet()))
+			.customFields(office.getCustomFieldValues().stream()
+				.map(cf -> new CustomFieldValueDto(cf.getValue().getStructure().getId(), cf.getValue().getValue()))
+				.toList())
+			.build();
+	}
+
+
 	@Override
+	@Transactional
 	public void deleteOffice(Long officeId) {
 		Office office = officeRepository.findById(officeId)
 			.orElseThrow(() -> new ResourceNotFoundException("Cannot find office with id: " + officeId));
@@ -157,6 +207,14 @@ public class OfficeServiceImpl implements OfficeService {
 		List<CFieldValue> valuesToMaybeDelete = office.getCustomFieldValues().stream()
 			.map(OfficeCFieldValue::getValue)
 			.toList();
+
+		changelogService.logOfficeChange(
+			office.getId(),
+			getCurrentUserEmail(),
+			"delete",
+			office,
+			null
+		);
 
 		officeRepository.delete(office);
 
@@ -168,7 +226,6 @@ public class OfficeServiceImpl implements OfficeService {
 			}
 		}
 	}
-
 
 	private Set<CFieldValue> resolveCustomFieldValues(List<CustomFieldValueDto> dtos) {
 		if (dtos == null || dtos.isEmpty()) {
@@ -196,6 +253,10 @@ public class OfficeServiceImpl implements OfficeService {
 					return cFieldValueRepository.save(newValue);
 				}))
 			.collect(Collectors.toSet());
+	}
+
+	private String getCurrentUserEmail() {
+		return SecurityContextHolder.getContext().getAuthentication().getName();
 	}
 
 }

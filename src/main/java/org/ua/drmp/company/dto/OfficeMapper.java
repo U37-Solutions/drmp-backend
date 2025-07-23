@@ -92,5 +92,36 @@ public class OfficeMapper {
 			.collect(Collectors.toList());
 	}
 
+	public OfficeViewDto toViewDto(Office office) {
+		Integer regionId = office.getRegionId();
+		if (!RegionConst.regions.containsKey(regionId)) {
+			throw new ResourceNotFoundException("Region not found");
+		}
+
+		List<CustomFieldValueDto> customFields = office.getCustomFieldValues().stream()
+			.map(ofv -> CustomFieldValueDto.builder()
+				.structureId(ofv.getValue().getStructure().getId())
+				.value(ofv.getValue().getValue())
+				.build())
+			.toList();
+
+		return OfficeViewDto.builder()
+			.id(office.getId())
+			.locationName(office.getLocationName())
+			.workSchedule(office.getWorkSchedule())
+			.additionalDescription(office.getAdditionalDescription())
+			.latitude(office.getLatitude())
+			.longitude(office.getLongitude())
+			.regionId(regionId)
+			.companyId(office.getCompany().getId())
+			.companyName(office.getCompany().getName())
+			.serviceIds(office.getServices().stream().map(ServiceOffice::getId).collect(Collectors.toSet()))
+			.categoryIds(office.getCategories().stream().map(Category::getId).collect(Collectors.toSet()))
+			.conditionIds(office.getConditions().stream().map(Condition::getId).collect(Collectors.toSet()))
+			.customFields(customFields)
+			.build();
+	}
+
+
 }
 

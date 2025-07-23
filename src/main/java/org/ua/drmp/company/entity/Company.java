@@ -62,5 +62,25 @@ public class Company {
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<Office> offices = new ArrayList<>();
+
+	@Override
+	public String toString() {
+		return "Company{" +
+			"id=" + id +
+			", name='" + name + '\'' +
+			", code='" + code + '\'' +
+			", contactName='" + contactName + '\'' +
+			", phone='" + phone + '\'' +
+			", email='" + email + '\'' +
+			", donorSupport='" + donorSupport + '\'' +
+			", ownershipType='" + ownershipType + '\'' +
+			", status=" + status +
+			", companyType=" + (companyType != null ? companyType.getName() : null) +
+			", users=" + users.stream().map(user -> user.getEmail() != null ? user.getEmail() : "unknown").toList() +
+			", offices=" + offices.stream().map(office -> office.getLocationName() != null ? office.getLocationName() : "unknown").toList() +
+			", socials=" + socials.stream().map(s -> s.getUrl() != null ? s.getUrl() : "unknown").toList() +
+			'}';
+	}
+
 }
 
