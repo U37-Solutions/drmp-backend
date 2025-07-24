@@ -23,7 +23,6 @@ public class CFieldStructureController {
 	private final CFieldStructureService service;
 
 	@GetMapping
-	@PreAuthorize("hasAnyRole('ADMIN')")
 	public List<CFieldStructureDto> getAll() {
 		return service.fetchAll();
 	}

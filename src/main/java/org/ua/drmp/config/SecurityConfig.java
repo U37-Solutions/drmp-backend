@@ -53,6 +53,13 @@ public class SecurityConfig {
 				.requestMatchers("/confirm-registration").permitAll()
 
 				.requestMatchers(HttpMethod.POST, "/chat/start").permitAll()
+
+				.requestMatchers(HttpMethod.GET, "/custom-structures").permitAll()
+				.requestMatchers(HttpMethod.GET, "/dictionary/services").permitAll()
+				.requestMatchers(HttpMethod.GET, "/dictionary/categories").permitAll()
+				.requestMatchers(HttpMethod.GET, "/dictionary/conditions").permitAll()
+				.requestMatchers(HttpMethod.GET, "/dictionary/company-types").permitAll()
+
 				.requestMatchers(HttpMethod.GET, "/chat/history").permitAll()
 
 				.requestMatchers(HttpMethod.POST, "/feedback").permitAll()
