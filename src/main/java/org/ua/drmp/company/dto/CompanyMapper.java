@@ -1,11 +1,14 @@
 package org.ua.drmp.company.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Component;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.CompanySocial;
 import org.ua.drmp.company.entity.CompanyStatus;
 import org.ua.drmp.company.entity.CompanyType;
+import org.ua.drmp.company.entity.Office;
 import org.ua.drmp.entity.User;
 
 @Component
@@ -33,7 +36,7 @@ public class CompanyMapper {
 	}
 
 
-	public Company toEntity(CompanyDto dto, CompanyType type, Set<User> users) {
+	public Company toEntity(CompanyDto dto, CompanyType type, Set<User> users, List<CompanySocial> socials, List<Office> offices) {
 		return Company.builder()
 			.id(dto.getId())
 			.name(dto.getName())
@@ -46,6 +49,8 @@ public class CompanyMapper {
 			.status(CompanyStatus.valueOf(dto.getStatus()))
 			.companyType(type)
 			.users(users)
+			.offices(offices != null ? offices : new ArrayList<>())
+			.socials(socials != null ? socials : new ArrayList<>())
 			.build();
 	}
 
