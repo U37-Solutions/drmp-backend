@@ -56,7 +56,7 @@ public class CompanyServiceImpl implements CompanyService {
 	public CompanyDto updateCompany(Long companyId, CompanyDto dto) {
 		Company company = companyRepository.findById(companyId)
 			.orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-		Company oldCompany = companyMapper.toEntity(companyMapper.toDto(company), company.getCompanyType(), company.getUsers());
+		Company oldCompany = companyMapper.toEntity(companyMapper.toDto(company), company.getCompanyType(), company.getUsers(), company.getSocials(), company.getOffices());
 
 		CompanyType type = companyTypeRepository.findById(dto.getCompanyTypeId())
 			.orElseThrow(() -> new ResourceNotFoundException("CompanyType not found"));
