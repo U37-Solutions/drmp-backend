@@ -29,13 +29,6 @@ public class FeedbackServiceImpl implements FeedbackService{
 	}
 
 	@Override
-	public FeedbackViewDto fetchById(Long id) {
-		Feedback feedback = feedbackRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Feedback not found"));
-		return feedbackMapper.toViewDto(feedback);
-	}
-
-	@Override
 	public void delete(Long id) {
 		feedbackRepository.deleteById(id);
 	}
