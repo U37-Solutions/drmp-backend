@@ -90,7 +90,8 @@ public class UserServiceImpl implements UserService {
 				user.getId(),
 				user.getEmail(),
 				user.getFirstName(),
-				user.getLastName()
+				user.getLastName(),
+				user.getRoles().stream().findFirst().orElseThrow(() -> new UserNotFoundException("Role not found")).getName()
 			))
 			.toList();
 	}
@@ -255,6 +256,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private UserResponse mapToResponse(User user) {
-		return new UserResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName());
+		return new UserResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
+			user.getRoles().stream().findFirst().orElseThrow(() -> new UserNotFoundException("Role not found"))
+				.getName());
 	}
 }

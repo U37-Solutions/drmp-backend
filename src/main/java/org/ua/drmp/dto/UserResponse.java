@@ -1,4 +1,6 @@
 package org.ua.drmp.dto;
 
-public record UserResponse(long id, String email, String firstName, String lastName) {
+import org.ua.drmp.entity.DRMPRole;
+
+public record UserResponse(long id, String email, String firstName, String lastName, DRMPRole role) {
 }
