@@ -133,7 +133,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 				SecurityContextHolder.getContext().getAuthentication().getName(),
 				"create",
 				null,
-				user
+				user.toJson()
 			);
 			userRepository.save(user);
 		} catch (DataIntegrityViolationException ex) {
@@ -149,7 +149,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 			email,
 			"create",
 			null,
-			savedCompany
+			savedCompany.toJson()
 		);
 
 		emailService.sendAccountCredentialsEmail(user.getEmail(), rawPassword);

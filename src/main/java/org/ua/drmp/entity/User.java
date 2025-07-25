@@ -1,6 +1,8 @@
 package org.ua.drmp.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -70,5 +72,12 @@ public class User {
 			", roles=" + roles.stream().map(r -> r.getName().name()).toList() +
 			'}';
 	}
-
+	public String toJson() {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			return "{}";
+		}
+	}
 }

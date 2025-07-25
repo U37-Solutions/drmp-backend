@@ -1,17 +1,18 @@
 package org.ua.drmp.logging;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import org.springframework.stereotype.Service;
-import org.ua.drmp.company.entity.Company;
-import org.ua.drmp.company.entity.Office;
-import org.ua.drmp.entity.User;
 import org.ua.drmp.exception.ResourceNotFoundException;
 
 @Service
@@ -23,10 +24,10 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	@Override
-	public void logUserChange(String email, String action, User prevValue, User newValue) {
+	public void logUserChange(String email, String action, String prevValue, String newValue) {
 		try {
 			Files.createDirectories(Paths.get("logs/users"));
-			LocalDateTime timestamp = LocalDateTime.now();
+			ZonedDateTime timestamp = ZonedDateTime.now(ZoneOffset.UTC);
 
 			String logLine = String.format(
 				"%s | %s | action: %s | prev: %s | new: %s",
@@ -63,10 +64,10 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	}
 
 	@Override
-	public void logCompanyChange(Long companyId, String email, String action, Company prevValue, Company newValue) {
+	public void logCompanyChange(Long companyId, String email, String action, String prevValue, String newValue) {
 		try {
 			Files.createDirectories(Paths.get(COMPANY_LOG_DIR));
-			LocalDateTime timestamp = LocalDateTime.now();
+			ZonedDateTime timestamp = ZonedDateTime.now(ZoneOffset.UTC);
 
 			String logLine = String.format(
 				"%s | %s | action: %s | prev: %s | new: %s",
@@ -98,12 +99,12 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	}
 
 	@Override
-	public void logOfficeChange(Long officeId, String email, String action, Office prevValue, Office newValue) {
+	public void logOfficeChange(Long officeId, String email, String action, String prevValue, String newValue) {
 		try {
 			Path directory = Paths.get(OFFICE_LOG_DIR);
 			Files.createDirectories(directory);
 
-			LocalDateTime timestamp = LocalDateTime.now();
+			ZonedDateTime timestamp = ZonedDateTime.now(ZoneOffset.UTC);
 
 			String logLine = String.format(
 				"%s | %s | action: %s | prev: %s | new: %s",

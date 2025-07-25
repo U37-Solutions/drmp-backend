@@ -133,8 +133,8 @@ public class UserServiceImpl implements UserService {
 			changelogService.logUserChange(
 				currentEmail,
 				"update",
-				oldUser,
-				user
+				oldUser.toJson(),
+				user.toJson()
 			);
 	}
 
@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService {
 		changelogService.logUserChange(
 			SecurityContextHolder.getContext().getAuthentication().getName(),
 			"delete",
-			user,
+			user.toJson(),
 			null
 		);
 	}
@@ -209,7 +209,7 @@ public class UserServiceImpl implements UserService {
 			SecurityContextHolder.getContext().getAuthentication().getName(),
 			"create",
 			null,
-			user
+			user.toJson()
 		);
 		emailService.sendInviteForCompanyUser(request.email(), rawPassword);
 	}
@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
 			SecurityContextHolder.getContext().getAuthentication().getName(),
 			"create",
 			null,
-			user
+			user.toJson()
 		);
 	}
 
