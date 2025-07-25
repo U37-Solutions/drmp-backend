@@ -70,12 +70,6 @@ public class Office {
 	@OneToMany(mappedBy = "office", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OfficeCFieldValue> customFieldValues = new ArrayList<>();
 
-	@ManyToMany
-	@JoinTable(name = "user_offices",
-		joinColumns = @JoinColumn(name = "office_id"),
-		inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private Set<User> users = new HashSet<>();
-
 	@Override
 	public String toString() {
 		return "Office{" +

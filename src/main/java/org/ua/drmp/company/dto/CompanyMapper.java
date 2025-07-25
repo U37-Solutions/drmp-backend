@@ -35,6 +35,10 @@ public class CompanyMapper {
 			.build();
 	}
 
+	public PublicCompanyDto toPublicDto(Company company) {
+		return new PublicCompanyDto(company.getId(), company.getName());
+	}
+
 
 	public Company toEntity(CompanyDto dto, CompanyType type, Set<User> users, List<CompanySocial> socials, List<Office> offices) {
 		return Company.builder()

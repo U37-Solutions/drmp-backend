@@ -109,6 +109,7 @@ public class EmailServiceImpl implements EmailService {
 		Context context = new Context();
 		context.setVariable("email", email);
 		context.setVariable("password", password);
+		context.setVariable("loginUrl", baseUrl + "/login");
 		String html = templateEngine.process("invite-company-user.html", context);
 		sendHtmlEmail(email, INVITE_SUBJECT, html);
 	}

@@ -3,10 +3,13 @@ package org.ua.drmp.company.service;
 import java.util.List;
 import java.util.Optional;
 import org.ua.drmp.company.dto.CompanyDto;
+import org.ua.drmp.company.dto.PublicCompanyDto;
 import org.ua.drmp.company.entity.CompanyStatus;
 
 public interface CompanyService {
 	List<CompanyDto> fetchAllCompanies();
+
+	List<PublicCompanyDto> fetchAllPublicCompanies();
 
 	List<CompanyDto> fetchCompanyByStatus(Optional<CompanyStatus> status);
 

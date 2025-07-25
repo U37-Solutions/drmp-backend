@@ -52,7 +52,7 @@ public class CompanyController {
 	}
 
 	// ADMIN або COMPANY_ADMIN (власник компанії)
-	@PreAuthorize("@userSecurity.isAdminOrCompanyAdmin(authentication, #id)")
+	@PreAuthorize("@userSecurity.isAdminEditorOrCompanyAdmin(authentication, #id)")
 	@PutMapping("/{id}")
 	public ResponseEntity<CompanyDto> updateCompany(@PathVariable Long id,
 		@RequestBody CompanyDto dto) {

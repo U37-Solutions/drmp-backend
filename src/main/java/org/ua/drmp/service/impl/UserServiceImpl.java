@@ -3,6 +3,7 @@ package org.ua.drmp.service.impl;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -198,7 +199,8 @@ public class UserServiceImpl implements UserService {
 		user.setEmail(request.email());
 		user.setFirstName(request.firstName());
 		user.setLastName(request.lastName());
-		user.setPassword(passwordEncoder.encode(request.password()));
+		String rawPassword = RandomStringUtils.randomAlphanumeric(10);
+		user.setPassword(passwordEncoder.encode(rawPassword));
 		user.setRoles(Set.of(role));
 		user.setCompany(companyAdmin.getCompany());
 
@@ -209,7 +211,7 @@ public class UserServiceImpl implements UserService {
 			null,
 			user
 		);
-		emailService.sendInviteForCompanyUser(request.email(), request.password());
+		emailService.sendInviteForCompanyUser(request.email(), rawPassword);
 	}
 
 	@Override
