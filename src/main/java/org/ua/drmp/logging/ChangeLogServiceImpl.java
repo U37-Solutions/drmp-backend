@@ -6,9 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -21,17 +18,15 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	private static final String USER_LOG_FILE = "logs/users/users.log";
 	private static final String COMPANY_LOG_DIR = "logs/companies";
 	private static final String OFFICE_LOG_DIR = "logs/offices";
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
 	@Override
 	public void logUserChange(String email, String action, String prevValue, String newValue) {
 		try {
 			Files.createDirectories(Paths.get("logs/users"));
-			ZonedDateTime timestamp = ZonedDateTime.now(ZoneOffset.UTC);
+			LocalDateTime timestamp = LocalDateTime.now();
 
 			String logLine = String.format(
 				"%s | %s | action: %s | prev: %s | new: %s",
-				timestamp.format(formatter),
+				timestamp,
 				email,
 				action,
 				prevValue == null ? "null" : prevValue,
@@ -67,11 +62,11 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	public void logCompanyChange(Long companyId, String email, String action, String prevValue, String newValue) {
 		try {
 			Files.createDirectories(Paths.get(COMPANY_LOG_DIR));
-			ZonedDateTime timestamp = ZonedDateTime.now(ZoneOffset.UTC);
+			LocalDateTime timestamp = LocalDateTime.now();
 
 			String logLine = String.format(
 				"%s | %s | action: %s | prev: %s | new: %s",
-				timestamp.format(formatter),
+				timestamp,
 				email,
 				action,
 				prevValue == null ? "null" : prevValue,
@@ -104,11 +99,11 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 			Path directory = Paths.get(OFFICE_LOG_DIR);
 			Files.createDirectories(directory);
 
-			ZonedDateTime timestamp = ZonedDateTime.now(ZoneOffset.UTC);
+			LocalDateTime timestamp = LocalDateTime.now();
 
 			String logLine = String.format(
 				"%s | %s | action: %s | prev: %s | new: %s",
-				timestamp.format(formatter),
+				timestamp,
 				email,
 				action,
 				prevValue == null ? "null" : prevValue,
@@ -149,7 +144,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 			String[] parts = line.split(" \\| ");
 			if (parts.length < 5) return null;
 
-			LocalDateTime timestamp = LocalDateTime.parse(parts[0].trim(), formatter);
+			LocalDateTime timestamp = LocalDateTime.parse(parts[0].trim());
 			String email = parts[1].trim();
 			String action = parts[2].replace("action: ", "").trim();
 			String prevValue = parts[3].replace("prev: ", "").trim();
