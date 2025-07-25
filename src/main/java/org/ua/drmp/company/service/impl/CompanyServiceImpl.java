@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.ua.drmp.company.dto.CompanyDto;
 import org.ua.drmp.company.dto.CompanyMapper;
+import org.ua.drmp.company.dto.PublicCompanyDto;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.CompanyStatus;
 import org.ua.drmp.company.entity.CompanyType;
@@ -36,6 +37,12 @@ public class CompanyServiceImpl implements CompanyService {
 	public List<CompanyDto> fetchAllCompanies() {
 		List<Company> companies = companyRepository.findAll();
 		return companies.stream().map(companyMapper::toDto).toList();
+	}
+
+	@Override
+	public List<PublicCompanyDto> fetchAllPublicCompanies() {
+		List<Company> companies = companyRepository.findAll();
+		return companies.stream().map(companyMapper::toPublicDto).toList();
 	}
 
 	@Override
