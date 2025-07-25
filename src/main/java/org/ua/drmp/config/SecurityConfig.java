@@ -64,7 +64,7 @@ public class SecurityConfig {
 
 				.requestMatchers(HttpMethod.GET, "/chat/history").permitAll()
 
-				.requestMatchers(HttpMethod.POST, "/feedback").permitAll()
+				.requestMatchers(HttpMethod.POST, "/feedbacks").permitAll()
 
 				.requestMatchers(HttpMethod.POST, "/company-register").permitAll()
 				.requestMatchers("/ws/**").permitAll()
