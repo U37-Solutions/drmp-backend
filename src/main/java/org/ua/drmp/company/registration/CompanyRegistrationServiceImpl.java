@@ -22,7 +22,7 @@ import org.ua.drmp.company.entity.CompanyType;
 import org.ua.drmp.company.entity.Condition;
 import org.ua.drmp.company.entity.Office;
 import org.ua.drmp.company.entity.ServiceOffice;
-import org.ua.drmp.company.repo.CFieldValueRepository;
+import org.ua.drmp.company.repo.CFieldStructureRepository;
 import org.ua.drmp.company.repo.CategoryRepository;
 import org.ua.drmp.company.repo.CompanyRepository;
 import org.ua.drmp.company.repo.CompanyTypeRepository;
@@ -52,7 +52,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 	private final PasswordEncoder passwordEncoder;
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
-	private final CFieldValueRepository cFieldValueRepository;
+	private final CFieldStructureRepository cFieldStructureRepository;
 	private final ChangeLogService changelogService;
 
 	public void registerCompany(CompanyRegisterRequest request) {
@@ -197,8 +197,11 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 		}
 
 		return dtos.stream()
-			.map(f -> cFieldValueRepository.findByStructureIdAndValue(f.getStructureId(), f.getValue())
-				.orElseThrow(() -> new ResourceNotFoundException("CFieldValue not found for structureId: " + f.getStructureId() + " and value: " + f.getValue())))
+			.map(dto -> CFieldValue.builder()
+				.value(dto.getValue())
+				.structure(cFieldStructureRepository.findById(dto.getStructureId())
+					.orElseThrow(() -> new ResourceNotFoundException("Структуру не знайдено з id: " + dto.getStructureId())))
+				.build())
 			.collect(Collectors.toSet());
 	}
 

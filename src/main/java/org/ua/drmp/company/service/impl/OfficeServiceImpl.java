@@ -101,7 +101,7 @@ public class OfficeServiceImpl implements OfficeService {
 			getCurrentUserEmail(),
 			"create",
 			null,
-			savedOffice.toJson()
+			officeMapper.toDto(savedOffice)
 		);
 
 		return officeMapper.toDto(savedOffice);
@@ -170,8 +170,8 @@ public class OfficeServiceImpl implements OfficeService {
 			savedOffice.getId(),
 			getCurrentUserEmail(),
 			"update",
-			oldOffice.toJson(),
-			savedOffice.toJson()
+			officeMapper.toDto(oldOffice),
+			officeMapper.toDto(savedOffice)
 		);
 
 		return officeMapper.toDto(savedOffice);
@@ -212,7 +212,7 @@ public class OfficeServiceImpl implements OfficeService {
 			office.getId(),
 			getCurrentUserEmail(),
 			"delete",
-			office.toJson(),
+			officeMapper.toDto(office),
 			null
 		);
 
