@@ -1,8 +1,6 @@
 package org.ua.drmp.company.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -96,14 +94,6 @@ public class Office {
 			.map(v -> v.getValue() != null ? v.getValue().getValue() : "unknown")
 			.toList() +
 			'}';
-	}
-	public String toJson() {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			return mapper.writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			return "{}";
-		}
 	}
 }
 

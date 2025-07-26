@@ -84,7 +84,7 @@ public class CompanyServiceImpl implements CompanyService {
 		Company updated = companyRepository.save(company);
 
 		String email = getUser().getEmail();
-		changelogService.logCompanyChange(companyId, email, "update", oldCompany.toJson(), updated.toJson());
+		changelogService.logCompanyChange(companyId, email, "update", companyMapper.toDto(oldCompany), companyMapper.toDto(updated));
 
 		return companyMapper.toDto(updated);
 	}
@@ -98,7 +98,7 @@ public class CompanyServiceImpl implements CompanyService {
 		Set<User> linkedUsers = company.getUsers();
 
 		String email = getUser().getEmail();
-		changelogService.logCompanyChange(companyId, email, "delete", company.toJson(), null);
+		changelogService.logCompanyChange(companyId, email, "delete", companyMapper.toDto(company), null);
 		for (User user : linkedUsers) {
 			user.setCompany(null);
 			tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(user.getId()));
@@ -139,7 +139,7 @@ public class CompanyServiceImpl implements CompanyService {
 			email,
 			"create",
 			null,
-			company.toJson()
+			companyMapper.toDto(company)
 		);
 	}
 

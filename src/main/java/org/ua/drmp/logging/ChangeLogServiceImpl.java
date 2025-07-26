@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.ua.drmp.company.dto.CompanyDto;
 import org.ua.drmp.company.dto.OfficeDto;
 import org.ua.drmp.exception.ResourceNotFoundException;
 
@@ -61,7 +62,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	}
 
 	@Override
-	public void logCompanyChange(Long companyId, String email, String action, String prevValue, String newValue) {
+	public void logCompanyChange(Long companyId, String email, String action, CompanyDto prevValue, CompanyDto newValue) {
 		try {
 			Files.createDirectories(Paths.get(COMPANY_LOG_DIR));
 			LocalDateTime timestamp = LocalDateTime.now();
@@ -71,8 +72,8 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 				timestamp,
 				email,
 				action,
-				prevValue == null ? "null" : prevValue,
-				newValue == null ? "null" : newValue
+				new ObjectMapper().writeValueAsString(prevValue),
+				new ObjectMapper().writeValueAsString(newValue)
 			);
 
 			Path path = Paths.get(COMPANY_LOG_DIR, "company-" + companyId + ".log");

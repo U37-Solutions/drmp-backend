@@ -149,7 +149,7 @@ public class CompanyRegistrationServiceImpl implements  CompanyRegistrationServi
 			email,
 			"create",
 			null,
-			savedCompany.toJson()
+			companyMapper.toDto(savedCompany)
 		);
 
 		emailService.sendAccountCredentialsEmail(user.getEmail(), rawPassword);
