@@ -1,5 +1,6 @@
 package org.ua.drmp.logging;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.ua.drmp.company.dto.OfficeDto;
 import org.ua.drmp.exception.ResourceNotFoundException;
 
 @Service
@@ -94,7 +96,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	}
 
 	@Override
-	public void logOfficeChange(Long officeId, String email, String action, String prevValue, String newValue) {
+	public void logOfficeChange(Long officeId, String email, String action, OfficeDto prevValue, OfficeDto newValue) {
 		try {
 			Path directory = Paths.get(OFFICE_LOG_DIR);
 			Files.createDirectories(directory);
@@ -106,8 +108,8 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 				timestamp,
 				email,
 				action,
-				prevValue == null ? "null" : prevValue,
-				newValue == null ? "null" : newValue
+				new ObjectMapper().writeValueAsString(prevValue),
+				new ObjectMapper().writeValueAsString(newValue)
 			);
 
 			Path officeLogFile = directory.resolve("office-" + officeId + ".log");
