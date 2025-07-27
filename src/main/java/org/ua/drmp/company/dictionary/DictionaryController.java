@@ -49,9 +49,9 @@ public class DictionaryController {
 		return ResponseEntity.ok().build();
 	}
 
-	@DeleteMapping(SERVICES_ENDPOINT + "/{id}")
-	public ResponseEntity<Void> deleteServiceById(@PathVariable Long id){
-		dictionaryService.deleteServiceById(id);
+	@DeleteMapping(SERVICES_ENDPOINT)
+	public ResponseEntity<Void> deleteServicesByIds(@RequestBody List<Long> ids){
+		dictionaryService.deleteServicesByIds(ids);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -77,9 +77,9 @@ public class DictionaryController {
 		return ResponseEntity.ok().build();
 	}
 
-	@DeleteMapping(CATEGORIES_ENDPOINT + "/{id}")
-	public ResponseEntity<Void> deleteCategoryById(@PathVariable Long id){
-		dictionaryService.deleteCategoryById(id);
+	@DeleteMapping(CATEGORIES_ENDPOINT)
+	public ResponseEntity<Void> deleteCategoriesByIds(@RequestBody List<Long> ids){
+		dictionaryService.deleteCategoriesByIds(ids);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -105,9 +105,9 @@ public class DictionaryController {
 		return ResponseEntity.ok().build();
 	}
 
-	@DeleteMapping(CONDITIONS_ENDPOINT + "/{id}")
-	public ResponseEntity<Void> deleteConditionById(@PathVariable Long id){
-		dictionaryService.deleteConditionById(id);
+	@DeleteMapping(CONDITIONS_ENDPOINT)
+	public ResponseEntity<Void> deleteConditionsByIds(@RequestBody List<Long> ids){
+		dictionaryService.deleteConditionsByIds(ids);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -133,9 +133,9 @@ public class DictionaryController {
 		return ResponseEntity.ok().build();
 	}
 
-	@DeleteMapping(COMPANY_TYPES_ENDPOINT + "/{id}")
-	public ResponseEntity<Void> deleteCompanyTypeById(@PathVariable Long id){
-		dictionaryService.deleteCompanyTypeById(id);
+	@DeleteMapping(COMPANY_TYPES_ENDPOINT)
+	public ResponseEntity<Void> deleteCompanyTypesByIds(@RequestBody List<Long> ids){
+		dictionaryService.deleteCompanyTypesByIds(ids);
 		return ResponseEntity.noContent().build();
 	}
 }
