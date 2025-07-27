@@ -81,6 +81,7 @@ public class EmailServiceImpl implements EmailService {
 		context.setVariable("companyName", company.getName());
 		context.setVariable("reviewLink", baseUrl + "/admin/companies/" + company.getId());
 		String htmlContent = templateEngine.process("company-review-notify.html", context);
+		//TODO: need to send to ADMIN, not for company
 		sendHtmlEmail(company.getEmail(), "Нова компанія чекає підтвердження", htmlContent);
 	}
 

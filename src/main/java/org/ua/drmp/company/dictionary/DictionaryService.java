@@ -1,5 +1,6 @@
 package org.ua.drmp.company.dictionary;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import org.ua.drmp.company.entity.Category;
 import org.ua.drmp.company.entity.CompanyType;
@@ -38,4 +39,9 @@ public interface DictionaryService {
 
 	void deleteCompanyTypeById(Long id);
 
+
+	void updateServices(List<@Valid IdNameDto> dtos);
+	void updateCategories(List<@Valid IdNameDto> dtos);
+	void updateConditions(List<@Valid IdNameDto> dtos);
+	void updateCompanyTypes(List<@Valid IdNameDto> dtos);
 }
