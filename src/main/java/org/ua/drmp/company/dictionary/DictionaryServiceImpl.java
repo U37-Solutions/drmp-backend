@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,11 +51,6 @@ public class DictionaryServiceImpl implements DictionaryService {
 	}
 
 	@Override
-	public void deleteServiceById(Long id) {
-		serviceRepository.deleteById(id);
-	}
-
-	@Override
 	public void createNewCategory(String name) {
 		Category category = new Category();
 		category.setName(name);
@@ -70,11 +66,6 @@ public class DictionaryServiceImpl implements DictionaryService {
 	public Category fetchCategoryById(Long id) {
 		return categoryRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-	}
-
-	@Override
-	public void deleteCategoryById(Long id) {
-		categoryRepository.deleteById(id);
 	}
 
 	@Override
@@ -96,11 +87,6 @@ public class DictionaryServiceImpl implements DictionaryService {
 	}
 
 	@Override
-	public void deleteConditionById(Long id) {
-		conditionRepository.deleteById(id);
-	}
-
-	@Override
 	public void createNewCompanyType(String name) {
 		CompanyType companyType = new CompanyType();
 		companyType.setName(name);
@@ -116,11 +102,6 @@ public class DictionaryServiceImpl implements DictionaryService {
 	public CompanyType fetchCompanyTypeById(Long id) {
 		return companyTypeRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Company type not found"));
-	}
-
-	@Override
-	public void deleteCompanyTypeById(Long id) {
-		companyTypeRepository.deleteById(id);
 	}
 
 	@Override
@@ -209,6 +190,59 @@ public class DictionaryServiceImpl implements DictionaryService {
 		}).toList();
 
 		companyTypeRepository.saveAll(updated);
+	}
+
+	@Override
+	@Transactional
+	public void deleteServicesByIds(List<Long> ids) {
+		validateAllIdsExistOrThrow(ids, serviceRepository.findAllById(ids).stream()
+			.map(ServiceOffice::getId), "Service(s) not found with id(s): ");
+
+		serviceRepository.deleteAllByIdInBatch(ids);
+	}
+
+
+	@Override
+	@Transactional
+	public void deleteCategoriesByIds(List<Long> ids) {
+		validateAllIdsExistOrThrow(ids, categoryRepository.findAllById(ids).stream()
+			.map(Category::getId), "Category(ies) not found with id(s): ");
+
+		categoryRepository.deleteAllByIdInBatch(ids);
+	}
+
+	@Override
+	@Transactional
+	public void deleteConditionsByIds(List<Long> ids) {
+		validateAllIdsExistOrThrow(ids, conditionRepository.findAllById(ids).stream()
+			.map(Condition::getId), "Condition(s) not found with id(s): ");
+
+		conditionRepository.deleteAllByIdInBatch(ids);
+	}
+
+	@Override
+	@Transactional
+	public void deleteCompanyTypesByIds(List<Long> ids) {
+		validateAllIdsExistOrThrow(ids, companyTypeRepository.findAllById(ids).stream()
+			.map(CompanyType::getId), "Company type(s) not found with id(s): ");
+
+		companyTypeRepository.deleteAllByIdInBatch(ids);
+	}
+
+	private void validateAllIdsExistOrThrow(List<Long> requestedIds, Stream<Long> existingIdsStream, String notFoundMessagePrefix) {
+		if (requestedIds == null || requestedIds.isEmpty()) {
+			throw new BadRequestException("ID list must not be empty");
+		}
+
+		List<Long> existingIds = existingIdsStream.toList();
+
+		List<Long> missingIds = requestedIds.stream()
+			.filter(id -> !existingIds.contains(id))
+			.toList();
+
+		if (!missingIds.isEmpty()) {
+			throw new ResourceNotFoundException(notFoundMessagePrefix + missingIds);
+		}
 	}
 
 

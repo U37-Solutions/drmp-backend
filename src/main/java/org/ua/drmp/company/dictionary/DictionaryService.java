@@ -13,15 +13,11 @@ public interface DictionaryService {
 
 	ServiceOffice fetchServiceById(Long id);
 
-	void deleteServiceById(Long id);
-
 	void createNewCategory(String name);
 
 	List<Category> fetchAllCategories();
 
 	Category fetchCategoryById(Long id);
-
-	void deleteCategoryById(Long id);
 
 	void createNewCondition(String name);
 
@@ -29,19 +25,21 @@ public interface DictionaryService {
 
 	Condition fetchConditionById(Long id);
 
-	void deleteConditionById(Long id);
-
 	void createNewCompanyType(String name);
 
 	List<CompanyType> fetchAllCompanyTypes();
 
 	CompanyType fetchCompanyTypeById(Long id);
 
-	void deleteCompanyTypeById(Long id);
-
 
 	void updateServices(List<@Valid IdNameDto> dtos);
 	void updateCategories(List<@Valid IdNameDto> dtos);
 	void updateConditions(List<@Valid IdNameDto> dtos);
 	void updateCompanyTypes(List<@Valid IdNameDto> dtos);
+
+	void deleteServicesByIds(List<Long> ids);
+	void deleteCategoriesByIds(List<Long> ids);
+	void deleteConditionsByIds(List<Long> ids);
+	void deleteCompanyTypesByIds(List<Long> ids);
+
 }
