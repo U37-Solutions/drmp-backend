@@ -221,10 +221,9 @@ public class DictionaryServiceImpl implements DictionaryService {
 	}
 
 	@Override
-	@Transactional
 	public void deleteCompanyTypesByIds(List<Long> ids) {
 		validateAllIdsExistOrThrow(ids, companyTypeRepository.findAllById(ids).stream()
-			.map(CompanyType::getId), "Company type(s) not found with id(s): ");
+			.map(CompanyType::getId), "Condition(s) not found with id(s): ");
 
 		companyTypeRepository.deleteAllByIdInBatch(ids);
 	}
@@ -245,7 +244,6 @@ public class DictionaryServiceImpl implements DictionaryService {
 		}
 	}
 
-
 	private void validateNoDuplicates(List<IdNameDto> dtos) {
 		Set<Long> uniqueIds = new HashSet<>();
 		for (IdNameDto dto : dtos) {
@@ -254,5 +252,4 @@ public class DictionaryServiceImpl implements DictionaryService {
 			}
 		}
 	}
-
 }

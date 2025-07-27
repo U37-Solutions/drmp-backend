@@ -31,15 +31,14 @@ public interface DictionaryService {
 
 	CompanyType fetchCompanyTypeById(Long id);
 
-
-	void updateServices(List<@Valid IdNameDto> dtos);
-	void updateCategories(List<@Valid IdNameDto> dtos);
-	void updateConditions(List<@Valid IdNameDto> dtos);
-	void updateCompanyTypes(List<@Valid IdNameDto> dtos);
-
 	void deleteServicesByIds(List<Long> ids);
 	void deleteCategoriesByIds(List<Long> ids);
 	void deleteConditionsByIds(List<Long> ids);
 	void deleteCompanyTypesByIds(List<Long> ids);
 
+
+	void updateServices(List<@Valid IdNameDto> dtos);
+	void updateCategories(List<@Valid IdNameDto> dtos);
+	void updateConditions(List<@Valid IdNameDto> dtos);
+	void updateCompanyTypes(List<@Valid IdNameDto> dtos);
 }
