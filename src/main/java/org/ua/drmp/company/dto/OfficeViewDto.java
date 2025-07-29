@@ -21,4 +21,6 @@ public class OfficeViewDto {
 	private Set<Long> categoryIds;
 	private Set<Long> conditionIds;
 	private List<CustomFieldValueDto> customFields;
+	private String city;
+	private Boolean isFree;
 }

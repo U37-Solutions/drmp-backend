@@ -2,6 +2,7 @@ package org.ua.drmp.company.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,6 +40,11 @@ public class Office {
 	private Double latitude;
 	private Double longitude;
 	private Integer regionId;
+
+	private String city;
+
+	@Column(name = "is_free")
+	private Boolean isFree;
 
 	@ManyToOne
 	@JoinColumn(name = "company_id")
