@@ -190,6 +190,8 @@ public class OfficeServiceImpl implements OfficeService {
 			.serviceIds(office.getServices().stream().map(ServiceOffice::getId).collect(Collectors.toSet()))
 			.categoryIds(office.getCategories().stream().map(Category::getId).collect(Collectors.toSet()))
 			.conditionIds(office.getConditions().stream().map(Condition::getId).collect(Collectors.toSet()))
+			.city(office.getCity())
+			.isFree(office.getIsFree())
 			.customFields(office.getCustomFieldValues().stream()
 				.map(cf -> new CustomFieldValueDto(cf.getValue().getStructure().getId(), cf.getValue().getValue()))
 				.toList())
@@ -233,7 +235,7 @@ public class OfficeServiceImpl implements OfficeService {
 		}
 
 		return dtos.stream()
-			.map(dto -> cFieldValueRepository.findByStructureIdAndValue(dto.getStructureId(), dto.getValue())
+			.map(dto -> cFieldValueRepository.findFirstByStructureIdAndValue(dto.getStructureId(), dto.getValue())
 				.orElseGet(() -> {
 					CFieldStructure structure = cFieldStructureRepository.findById(dto.getStructureId())
 						.orElseThrow(() -> new ResourceNotFoundException("CFieldStructure not found: " + dto.getStructureId()));

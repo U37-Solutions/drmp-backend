@@ -10,8 +10,11 @@ import org.ua.drmp.company.entity.CFieldValue;
 @Repository
 public interface CFieldValueRepository extends JpaRepository<CFieldValue, Long> {
 
-	@Query("SELECT v FROM CFieldValue v WHERE v.structure.id = :structureId AND v.value = :value")
-	Optional<CFieldValue> findByStructureIdAndValue(@Param("structureId") Long structureId,
+	@Query(
+		value = "SELECT * FROM cfield_values WHERE cfield_structures_id = :structureId AND value = :value LIMIT 1",
+		nativeQuery = true
+	)
+	Optional<CFieldValue> findFirstByStructureIdAndValue(@Param("structureId") Long structureId,
 		@Param("value") String value);
 
 }

@@ -22,6 +22,9 @@ public class OfficeDto {
 	private Integer regionId;
 	private Long companyId;
 
+	private String city;
+	private Boolean isFree;
+
 	private Set<Long> serviceIds;
 	private Set<Long> categoryIds;
 	private Set<Long> conditionIds;

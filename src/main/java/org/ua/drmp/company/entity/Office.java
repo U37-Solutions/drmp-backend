@@ -44,6 +44,10 @@ public class Office {
 
 	@Column(columnDefinition = "geometry(Point,4326)")
 	private Point coordinates;
+	private String city;
+
+	@Column(name = "is_free")
+	private Boolean isFree;
 
 	@ManyToOne
 	@JoinColumn(name = "company_id")

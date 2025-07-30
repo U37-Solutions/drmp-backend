@@ -51,6 +51,8 @@ public class OfficeMapper {
 			.categoryIds(office.getCategories().stream().map(Category::getId).collect(Collectors.toSet()))
 			.conditionIds(office.getConditions().stream().map(Condition::getId).collect(Collectors.toSet()))
 			.customFields(customFields)
+			.isFree(office.getIsFree())
+			.city(office.getCity())
 			.build();
 	}
 
@@ -88,6 +90,8 @@ public class OfficeMapper {
 			.company(company)
 			.services(services)
 			.categories(categories)
+			.isFree(dto.getIsFree())
+			.city(dto.getCity())
 			.conditions(conditions);
 
 		if (dto.getLatitude() != null && dto.getLongitude() != null) {
@@ -133,6 +137,8 @@ public class OfficeMapper {
 			.categoryIds(office.getCategories().stream().map(Category::getId).collect(Collectors.toSet()))
 			.conditionIds(office.getConditions().stream().map(Condition::getId).collect(Collectors.toSet()))
 			.customFields(customFields)
+			.isFree(office.getIsFree())
+			.city(office.getCity())
 			.build();
 	}
 
