@@ -17,12 +17,14 @@ public class PublicMapPointDto {
 	private String additionalDescription;
 	private Double latitude;
 	private Double longitude;
-	private Integer regionId;
 	private Long companyId;
-	private Set<Long> serviceIds;
-	private Set<Long> categoryIds;
-	private Set<Long> conditionIds;
+	private String regionName;
+	private Set<String> services;
+	private Set<String> categories;
+	private Set<String> conditions;
 	private List<CustomFieldValueDto> customFields;
+	private String city;
+	private Boolean isFree;
 
 	// Company fields
 	private String companyName;
