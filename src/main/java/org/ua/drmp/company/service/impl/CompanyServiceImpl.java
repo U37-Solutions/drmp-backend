@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.ua.drmp.company.dto.CompanyDto;
 import org.ua.drmp.company.dto.CompanyMapper;
-import org.ua.drmp.company.dto.PublicCompanyDto;
+import org.ua.drmp.open.PublicCompanyDto;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.CompanyStatus;
 import org.ua.drmp.company.entity.CompanyType;

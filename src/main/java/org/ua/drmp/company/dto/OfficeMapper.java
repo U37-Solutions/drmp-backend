@@ -3,6 +3,9 @@ package org.ua.drmp.company.dto;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Component;
 import org.ua.drmp.company.entity.CFieldValue;
 import org.ua.drmp.company.entity.Category;
@@ -15,6 +18,12 @@ import org.ua.drmp.exception.ResourceNotFoundException;
 
 @Component
 public class OfficeMapper {
+
+	private static final GeometryFactory geometryFactory = new GeometryFactory();
+
+	public static Point createPoint(double lon, double lat) {
+		return geometryFactory.createPoint(new Coordinate(lon, lat));
+	}
 
 	public OfficeDto toDto(Office office) {
 		Integer regionId = office.getRegionId();
@@ -68,7 +77,7 @@ public class OfficeMapper {
 			throw new ResourceNotFoundException("Region not found");
 		}
 
-		return Office.builder()
+		Office.OfficeBuilder builder = Office.builder()
 			.id(dto.getId())
 			.workSchedule(dto.getWorkSchedule())
 			.additionalDescription(dto.getAdditionalDescription())
@@ -79,8 +88,13 @@ public class OfficeMapper {
 			.company(company)
 			.services(services)
 			.categories(categories)
-			.conditions(conditions)
-			.build();
+			.conditions(conditions);
+
+		if (dto.getLatitude() != null && dto.getLongitude() != null) {
+			builder.coordinates(createPoint(dto.getLongitude(), dto.getLatitude()));
+		}
+
+		return builder.build();
 	}
 
 	private List<OfficeCFieldValue> mapCFieldValues(Set<CFieldValue> cFieldValues, Office office) {

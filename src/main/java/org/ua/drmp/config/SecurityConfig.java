@@ -61,6 +61,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/dictionary/company-types").permitAll()
 
 				.requestMatchers(HttpMethod.GET, "/public/companies").permitAll()
+				.requestMatchers(HttpMethod.GET, "/public/map-points").permitAll()
 
 				.requestMatchers(HttpMethod.GET, "/chat/history").permitAll()
 
