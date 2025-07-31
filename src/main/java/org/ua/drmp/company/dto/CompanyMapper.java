@@ -10,6 +10,7 @@ import org.ua.drmp.company.entity.CompanyStatus;
 import org.ua.drmp.company.entity.CompanyType;
 import org.ua.drmp.company.entity.Office;
 import org.ua.drmp.entity.User;
+import org.ua.drmp.open.PublicCompanyDto;
 
 @Component
 public class CompanyMapper {

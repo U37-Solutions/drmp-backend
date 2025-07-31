@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.ua.drmp.entity.User;
 
 @Entity
@@ -41,6 +42,8 @@ public class Office {
 	private Double longitude;
 	private Integer regionId;
 
+	@Column(columnDefinition = "geometry(Point,4326)")
+	private Point coordinates;
 	private String city;
 
 	@Column(name = "is_free")

@@ -1,5 +1,6 @@
 package org.ua.drmp.config;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -7,6 +8,7 @@ import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.Office;
 import org.ua.drmp.company.repo.CompanyRepository;
 import org.ua.drmp.company.repo.OfficeRepository;
+import org.ua.drmp.entity.User;
 import org.ua.drmp.exception.ResourceNotFoundException;
 import org.ua.drmp.repo.UserRepository;
 
@@ -25,12 +27,35 @@ public class UserSecurity {
 			.orElse(false);
 	}
 
-	public boolean isAdminOrOwner(Authentication authentication, Long userId) {
+	public boolean isAdminOrOwner(Authentication authentication, Long targetUserId) {
 		String email = authentication.getName();
-		return userRepository.findByEmail(email)
-			.map(user -> user.hasRole("ADMIN") || user.getId().equals(userId))
-			.orElse(false);
+
+		Optional<User> optionalCurrentUser = userRepository.findByEmail(email);
+		Optional<User> optionalTargetUser = userRepository.findById(targetUserId);
+
+		if (optionalCurrentUser.isEmpty() || optionalTargetUser.isEmpty()) {
+			return false;
+		}
+
+		User currentUser = optionalCurrentUser.get();
+		User targetUser = optionalTargetUser.get();
+
+		// admin
+		if (currentUser.hasRole("ADMIN")) {
+			return true;
+		}
+
+		// owned
+		if (currentUser.getId().equals(targetUserId)) {
+			return true;
+		}
+
+		// CA can delete CU
+		return currentUser.hasRole("COMPANY_ADMIN")
+			&& targetUser.hasRole("COMPANY_USER")
+			&& currentUser.getCompany().getId().equals(targetUser.getCompany().getId());
 	}
+
 
 	public boolean isAdminOrOwnerOrEditor(Authentication authentication, Long userId) {
 		String email = authentication.getName();
