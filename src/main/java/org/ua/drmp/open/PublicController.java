@@ -24,7 +24,16 @@ public class PublicController {
 	}
 
 	@GetMapping("/map-points")
-	public List<PublicMapPointDto> getMapPoints(@RequestParam(required = false) String boundaries) {
+	public List<PublicMapPointDto> getMapPoints(
+		@RequestParam(required = false) String boundaries,
+		@RequestParam(required = false) String search_by,
+		@RequestParam(required = false) String search,
+		@RequestParam(required = false) String regionName,
+		@RequestParam(required = false) String city,
+		@RequestParam(required = false) List<String> categories,
+		@RequestParam(required = false) List<String> services,
+		@RequestParam(required = false) Boolean isFree
+	) {
 		Optional<double[]> parsedBounds = Optional.empty();
 
 		if (boundaries != null && !boundaries.isBlank()) {
@@ -37,6 +46,12 @@ public class PublicController {
 			}
 		}
 
-		return publicMapService.getOfficesInBounds(parsedBounds);
+		return publicMapService.searchOffices(
+			search_by, search,
+			regionName, city,
+			categories, services,
+			isFree,
+			parsedBounds
+		);
 	}
 }

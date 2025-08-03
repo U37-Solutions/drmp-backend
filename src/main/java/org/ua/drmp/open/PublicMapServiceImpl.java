@@ -20,19 +20,39 @@ public class PublicMapServiceImpl implements PublicMapService {
 
 	private final PublicOfficeRepository officeRepository;
 	private final CompanyMapper companyMapper;
+
 	@Override
-	public List<PublicMapPointDto> getOfficesInBounds(Optional<double[]> boundaries) {
+	public List<PublicMapPointDto> searchOffices(String searchBy, String search,
+		String regionName, String city,
+		List<String> categories, List<String> services,
+		Boolean isFree,
+		Optional<double[]> boundaries) {
+
+		boolean anyFilterPresent =
+			(search != null && !search.isBlank()) ||
+				(regionName != null && !regionName.isBlank()) ||
+				(city != null && !city.isBlank()) ||
+				(categories != null && !categories.isEmpty()) ||
+				(services != null && !services.isEmpty()) ||
+				isFree != null;
+
 		List<Office> offices;
 
-		if (boundaries.isPresent() && boundaries.get().length == 4) {
-			double[] b = boundaries.get();
-			offices = officeRepository.findOfficesWithinBounds(b[0], b[1], b[2], b[3]);
+		if (anyFilterPresent) {
+			offices = officeRepository.searchWithFilters(
+				searchBy, search, regionName, city, categories, services, isFree, Optional.empty()
+			);
 		} else {
-			offices = officeRepository.findAllWithCoordinates();
+			offices = boundaries.filter(b -> b.length == 4)
+				.map(b -> officeRepository.findOfficesWithinBounds(b[0], b[1], b[2], b[3]))
+				.orElseGet(officeRepository::findAllWithCoordinates);
 		}
 
-		return offices.stream().map(this::mapToDto).toList();
+		return offices.stream()
+			.map(this::mapToDto)
+			.toList();
 	}
+
 
 	private PublicMapPointDto mapToDto(Office office) {
 		Company company = office.getCompany();
