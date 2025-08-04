@@ -9,11 +9,9 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.ua.drmp.company.dto.RegionConst;
 import org.ua.drmp.company.entity.Office;
 
 @Repository
@@ -39,7 +37,7 @@ public class PublicOfficeRepositoryImpl implements PublicOfficeRepositoryCustom 
 
 	@Override
 	public List<Office> searchWithFilters(String searchBy, String search,
-		String regionName, String city,
+		Long regionId, String city,
 		List<String> categories, List<String> services,
 		Boolean isFree,
 		Optional<double[]> boundaries) {
@@ -58,11 +56,8 @@ public class PublicOfficeRepositoryImpl implements PublicOfficeRepositoryCustom 
 			}
 		}
 
-		if (regionName != null) {
-			RegionConst.regions.entrySet().stream()
-				.filter(entry -> entry.getValue().equalsIgnoreCase(regionName))
-				.map(Map.Entry::getKey)
-				.findFirst().ifPresent(regionId -> predicates.add(cb.equal(office.get("regionId"), regionId)));
+		if (regionId != null) {
+			predicates.add(cb.equal(office.get("regionId"), regionId.intValue()));
 		}
 
 		if (city != null) {
@@ -84,7 +79,7 @@ public class PublicOfficeRepositoryImpl implements PublicOfficeRepositoryCustom 
 		}
 
 		// Якщо немає жодного фільтра — додаємо пошук по координатах
-		if (search == null && regionName == null && city == null
+		if (search == null && regionId == null && city == null
 			&& (categories == null || categories.isEmpty())
 			&& (services == null || services.isEmpty())
 			&& isFree == null

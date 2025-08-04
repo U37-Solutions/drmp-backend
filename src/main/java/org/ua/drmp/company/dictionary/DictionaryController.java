@@ -38,8 +38,8 @@ public class DictionaryController {
 	}
 
 	@PostMapping(SERVICES_ENDPOINT)
-	public ResponseEntity<ServiceOffice> createNewServiceOffice(@RequestBody String name) {
-		dictionaryService.createNewService(name);
+	public ResponseEntity<ServiceOffice> createNewServiceOffice(@RequestBody NameListDto listDto) {
+		dictionaryService.createNewService(listDto.values());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -66,8 +66,8 @@ public class DictionaryController {
 	}
 
 	@PostMapping(CATEGORIES_ENDPOINT)
-	public ResponseEntity<Category> createNewCategory(@RequestBody String name) {
-		dictionaryService.createNewCategory(name);
+	public ResponseEntity<Category> createNewCategory(@RequestBody NameListDto listDto) {
+		dictionaryService.createNewCategory(listDto.values());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -94,8 +94,8 @@ public class DictionaryController {
 	}
 
 	@PostMapping(CONDITIONS_ENDPOINT)
-	public ResponseEntity<Condition> createNewCondition(@RequestBody String name) {
-		dictionaryService.createNewCondition(name);
+	public ResponseEntity<Condition> createNewCondition(@RequestBody NameListDto listDto) {
+		dictionaryService.createNewCondition(listDto.values());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -122,8 +122,8 @@ public class DictionaryController {
 	}
 
 	@PostMapping(COMPANY_TYPES_ENDPOINT)
-	public ResponseEntity<CompanyType> createNewCompanyType(@RequestBody String name) {
-		dictionaryService.createNewCompanyType(name);
+	public ResponseEntity<CompanyType> createNewCompanyType(@RequestBody NameListDto listDto) {
+		dictionaryService.createNewCompanyType(listDto.values());
 		return ResponseEntity.noContent().build();
 	}
 
