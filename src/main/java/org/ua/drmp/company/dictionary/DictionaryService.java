@@ -8,24 +8,24 @@ import org.ua.drmp.company.entity.Condition;
 import org.ua.drmp.company.entity.ServiceOffice;
 
 public interface DictionaryService {
-	void createNewService(String name);
+	void createNewService(List<String> names);
 	List<ServiceOffice> fetchAllServices();
 
 	ServiceOffice fetchServiceById(Long id);
 
-	void createNewCategory(String name);
+	void createNewCategory(List<String> names);
 
 	List<Category> fetchAllCategories();
 
 	Category fetchCategoryById(Long id);
 
-	void createNewCondition(String name);
+	void createNewCondition(List<String> names);
 
 	List<Condition> fetchAllConditions();
 
 	Condition fetchConditionById(Long id);
 
-	void createNewCompanyType(String name);
+	void createNewCompanyType(List<String> names);
 
 	List<CompanyType> fetchAllCompanyTypes();
 

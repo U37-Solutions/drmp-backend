@@ -33,10 +33,16 @@ public class DictionaryServiceImpl implements DictionaryService {
 	private final CompanyTypeRepository companyTypeRepository;
 
 	@Override
-	public void createNewService(String name) {
-		ServiceOffice serviceOffice = new ServiceOffice();
-		serviceOffice.setName(name);
-		serviceRepository.save(serviceOffice);
+	public void createNewService(List<String> names) {
+		List<ServiceOffice> services = names.stream()
+			.map(name -> {
+				ServiceOffice service = new ServiceOffice();
+				service.setName(name);
+				return service;
+			})
+			.toList();
+
+		serviceRepository.saveAll(services);
 	}
 
 	@Override
@@ -51,10 +57,16 @@ public class DictionaryServiceImpl implements DictionaryService {
 	}
 
 	@Override
-	public void createNewCategory(String name) {
-		Category category = new Category();
-		category.setName(name);
-		categoryRepository.save(category);
+	public void createNewCategory(List<String> names) {
+		List<Category> categories = names.stream()
+			.map(name -> {
+				Category category = new Category();
+				category.setName(name);
+				return category;
+			})
+			.toList();
+
+		categoryRepository.saveAll(categories);
 	}
 
 	@Override
@@ -69,10 +81,16 @@ public class DictionaryServiceImpl implements DictionaryService {
 	}
 
 	@Override
-	public void createNewCondition(String name) {
-		Condition condition = new Condition();
-		condition.setName(name);
-		conditionRepository.save(condition);
+	public void createNewCondition(List<String> names) {
+		List<Condition> conditions = names.stream()
+			.map(name -> {
+				Condition condition = new Condition();
+				condition.setName(name);
+				return condition;
+			})
+			.toList();
+
+		conditionRepository.saveAll(conditions);
 	}
 
 	@Override
@@ -87,10 +105,16 @@ public class DictionaryServiceImpl implements DictionaryService {
 	}
 
 	@Override
-	public void createNewCompanyType(String name) {
-		CompanyType companyType = new CompanyType();
-		companyType.setName(name);
-		companyTypeRepository.save(companyType);
+	public void createNewCompanyType(List<String> names) {
+		List<CompanyType> companyTypes = names.stream()
+			.map(name -> {
+				CompanyType companyType = new CompanyType();
+				companyType.setName(name);
+				return companyType;
+			})
+			.toList();
+
+		companyTypeRepository.saveAll(companyTypes);
 	}
 
 	@Override

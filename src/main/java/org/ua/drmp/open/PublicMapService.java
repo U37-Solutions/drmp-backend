@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public interface PublicMapService {
 	List<PublicMapPointDto> searchOffices(String searchBy, String search,
-		String regionName, String city,
+		Long regionId, String city,
 		List<String> categories, List<String> services,
 		Boolean isFree,
 		Optional<double[]> boundaries);

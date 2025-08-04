@@ -28,7 +28,7 @@ public class PublicController {
 		@RequestParam(required = false) String boundaries,
 		@RequestParam(required = false) String search_by,
 		@RequestParam(required = false) String search,
-		@RequestParam(required = false) String regionName,
+		@RequestParam(required = false) Long regionId,
 		@RequestParam(required = false) String city,
 		@RequestParam(required = false) List<String> categories,
 		@RequestParam(required = false) List<String> services,
@@ -48,7 +48,7 @@ public class PublicController {
 
 		return publicMapService.searchOffices(
 			search_by, search,
-			regionName, city,
+			regionId, city,
 			categories, services,
 			isFree,
 			parsedBounds
