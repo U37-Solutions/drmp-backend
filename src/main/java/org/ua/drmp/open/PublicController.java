@@ -30,8 +30,8 @@ public class PublicController {
 		@RequestParam(required = false) String search,
 		@RequestParam(required = false) Long regionId,
 		@RequestParam(required = false) String city,
-		@RequestParam(required = false) List<String> categories,
-		@RequestParam(required = false) List<String> services,
+		@RequestParam(required = false) List<Long> categoryIds,
+		@RequestParam(required = false) List<Long> serviceIds,
 		@RequestParam(required = false) Boolean isFree
 	) {
 		Optional<double[]> parsedBounds = Optional.empty();
@@ -49,7 +49,7 @@ public class PublicController {
 		return publicMapService.searchOffices(
 			search_by, search,
 			regionId, city,
-			categories, services,
+			categoryIds, serviceIds,
 			isFree,
 			parsedBounds
 		);

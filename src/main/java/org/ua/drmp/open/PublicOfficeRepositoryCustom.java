@@ -9,7 +9,7 @@ public interface PublicOfficeRepositoryCustom {
 
 	List<Office> searchWithFilters(String searchBy, String search,
 		Long regionId, String city,
-		List<String> categories, List<String> services,
+		List<Long> categoryIds, List<Long> serviceIds,
 		Boolean isFree,
 		Optional<double[]> boundaries);
 }
