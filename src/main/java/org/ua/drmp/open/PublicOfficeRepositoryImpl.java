@@ -38,7 +38,7 @@ public class PublicOfficeRepositoryImpl implements PublicOfficeRepositoryCustom 
 	@Override
 	public List<Office> searchWithFilters(String searchBy, String search,
 		Long regionId, String city,
-		List<String> categories, List<String> services,
+		List<Long> categoryIds, List<Long> serviceIds,
 		Boolean isFree,
 		Optional<double[]> boundaries) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -68,20 +68,20 @@ public class PublicOfficeRepositoryImpl implements PublicOfficeRepositoryCustom 
 			predicates.add(cb.equal(office.get("isFree"), isFree));
 		}
 
-		if (categories != null && !categories.isEmpty()) {
+		if (categoryIds != null && !categoryIds.isEmpty()) {
 			Join<Object, Object> catJoin = office.join("categories");
-			predicates.add(catJoin.get("name").in(categories));
+			predicates.add(catJoin.get("id").in(categoryIds));
 		}
 
-		if (services != null && !services.isEmpty()) {
+		if (serviceIds != null && !serviceIds.isEmpty()) {
 			Join<Object, Object> srvJoin = office.join("services");
-			predicates.add(srvJoin.get("name").in(services));
+			predicates.add(srvJoin.get("id").in(serviceIds));
 		}
 
 		// Якщо немає жодного фільтра — додаємо пошук по координатах
 		if (search == null && regionId == null && city == null
-			&& (categories == null || categories.isEmpty())
-			&& (services == null || services.isEmpty())
+			&& (categoryIds == null || categoryIds.isEmpty())
+			&& (serviceIds == null || serviceIds.isEmpty())
 			&& isFree == null
 			&& boundaries.isPresent() && boundaries.get().length == 4) {
 

@@ -24,7 +24,7 @@ public class PublicMapServiceImpl implements PublicMapService {
 	@Override
 	public List<PublicMapPointDto> searchOffices(String searchBy, String search,
 		Long regionId, String city,
-		List<String> categories, List<String> services,
+		List<Long> categoryIds, List<Long> serviceIds,
 		Boolean isFree,
 		Optional<double[]> boundaries) {
 
@@ -32,15 +32,15 @@ public class PublicMapServiceImpl implements PublicMapService {
 			(search != null && !search.isBlank()) ||
 				(regionId != null) ||
 				(city != null && !city.isBlank()) ||
-				(categories != null && !categories.isEmpty()) ||
-				(services != null && !services.isEmpty()) ||
+				(categoryIds != null && !categoryIds.isEmpty()) ||
+				(serviceIds != null && !serviceIds.isEmpty()) ||
 				isFree != null;
 
 		List<Office> offices;
 
 		if (anyFilterPresent) {
 			offices = officeRepository.searchWithFilters(
-				searchBy, search, regionId, city, categories, services, isFree, Optional.empty()
+				searchBy, search, regionId, city, categoryIds, serviceIds, isFree, Optional.empty()
 			);
 		} else {
 			offices = boundaries.filter(b -> b.length == 4)
