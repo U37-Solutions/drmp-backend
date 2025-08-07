@@ -18,9 +18,10 @@ import org.ua.drmp.exception.ResourceNotFoundException;
 @Service
 public class ChangeLogServiceImpl implements ChangeLogService {
 
-	private static final String USER_LOG_FILE = "logs/users/users.log";
-	private static final String COMPANY_LOG_DIR = "logs/companies";
-	private static final String OFFICE_LOG_DIR = "logs/offices";
+	private static final String BASE_LOG_PATH = "/app/logs";
+	private static final String USER_LOG_FILE = BASE_LOG_PATH + "/users/users.log";
+	private static final String COMPANY_LOG_DIR = BASE_LOG_PATH + "/companies";
+	private static final String OFFICE_LOG_DIR = BASE_LOG_PATH + "/offices";
 	@Override
 	public void logUserChange(String email, String action, String prevValue, String newValue) {
 		try {

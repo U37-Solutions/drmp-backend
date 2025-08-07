@@ -16,6 +16,7 @@ import org.ua.drmp.exception.BadRequestException;
 
 public class CityServiceImpl implements CityService {
 	private final ObjectMapper objectMapper;
+	private static final String REGIONS_PATH = "/app/data/regions";
 	@Override
 	public List<CityEntryDto> getCitiesByRegionId(int regionId) {
 		String regionName = RegionConst.regions.get(regionId);
@@ -28,7 +29,7 @@ public class CityServiceImpl implements CityService {
 			: regionName + "-область";
 
 		String fileName = fileRegionName.replace(" ", "-") + ".json";
-		Path path = Path.of("src/main/resources/static/cities", fileName);
+		Path path = Path.of(REGIONS_PATH, fileName);
 
 		if (!Files.exists(path)) {
 			throw new BadRequestException("File not found for region: " + regionName);
