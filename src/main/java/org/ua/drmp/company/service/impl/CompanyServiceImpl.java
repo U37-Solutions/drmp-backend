@@ -7,8 +7,14 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.ua.drmp.chat.entity.Chat;
+import org.ua.drmp.chat.entity.ChatMessage;
+import org.ua.drmp.chat.repo.ChatMessageRepository;
+import org.ua.drmp.chat.repo.ChatRepository;
 import org.ua.drmp.company.dto.CompanyDto;
 import org.ua.drmp.company.dto.CompanyMapper;
+import org.ua.drmp.feedback.Feedback;
+import org.ua.drmp.feedback.FeedbackRepository;
 import org.ua.drmp.open.PublicCompanyDto;
 import org.ua.drmp.company.entity.Company;
 import org.ua.drmp.company.entity.CompanyStatus;
@@ -32,6 +38,9 @@ public class CompanyServiceImpl implements CompanyService {
 	private final UserRepository userRepository;
 	private final TokenRepository tokenRepository;
 	private final ChangeLogService changelogService;
+	private final ChatRepository chatRepository;
+	private final FeedbackRepository feedbackRepository;
+	private final ChatMessageRepository chatMessageRepository;
 
 	@Override
 	public List<CompanyDto> fetchAllCompanies() {
@@ -104,6 +113,17 @@ public class CompanyServiceImpl implements CompanyService {
 			tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(user.getId()));
 			userRepository.delete(user);
 		}
+		// delete chats and messages
+		List<Chat> chats = chatRepository.findTop50ArchivedChatsByCompanyId(companyId);
+		chats.forEach(chat -> {
+				List<ChatMessage> chatMessages = chatMessageRepository.findByChatOrderBySentAtAsc(chat);
+				chatMessages.forEach(chatMessage -> chatMessageRepository.deleteById(chatMessage.getId()));
+				chatRepository.deleteById(chat.getId());
+			}
+			);
+		// delete feedbacks
+		List<Feedback> feedbacks = feedbackRepository.findAllByCompanyId(companyId);
+		feedbacks.forEach(feedback -> feedbackRepository.deleteById(feedback.getId()));
 
 		company.getUsers().clear(); // на всяк випадок, щоб Hibernate не намагався оновлювати зв’язки
 		companyRepository.delete(company);

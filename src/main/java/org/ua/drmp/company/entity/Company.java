@@ -1,8 +1,6 @@
 package org.ua.drmp.company.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -82,14 +80,6 @@ public class Company {
 			", offices=" + offices.stream().map(office -> office.getLocationName() != null ? office.getLocationName() : "unknown").toList() +
 			", socials=" + socials.stream().map(s -> s.getUrl() != null ? s.getUrl() : "unknown").toList() +
 			'}';
-	}
-	public String toJson() {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			return mapper.writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			return "{}";
-		}
 	}
 }
 
