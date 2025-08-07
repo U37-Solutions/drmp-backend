@@ -26,7 +26,7 @@ public class PublicController {
 	@GetMapping("/map-points")
 	public List<PublicMapPointDto> getMapPoints(
 		@RequestParam(required = false) String boundaries,
-		@RequestParam(required = false) String search_by,
+		@RequestParam(required = false) String searchBy,
 		@RequestParam(required = false) String search,
 		@RequestParam(required = false) Long regionId,
 		@RequestParam(required = false) String city,
@@ -47,7 +47,7 @@ public class PublicController {
 		}
 
 		return publicMapService.searchOffices(
-			search_by, search,
+			searchBy, search,
 			regionId, city,
 			categoryIds, serviceIds,
 			isFree,

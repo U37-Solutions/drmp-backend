@@ -59,6 +59,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/dictionary/categories").permitAll()
 				.requestMatchers(HttpMethod.GET, "/dictionary/conditions").permitAll()
 				.requestMatchers(HttpMethod.GET, "/dictionary/company-types").permitAll()
+				.requestMatchers(HttpMethod.GET, "/dictionary/cities/**").permitAll()
 
 				.requestMatchers(HttpMethod.GET, "/public/companies").permitAll()
 				.requestMatchers(HttpMethod.GET, "/public/map-points").permitAll()
