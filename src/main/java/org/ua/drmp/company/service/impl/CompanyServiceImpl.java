@@ -1,6 +1,7 @@
 package org.ua.drmp.company.service.impl;
 
 import jakarta.transaction.Transactional;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -106,8 +107,6 @@ public class CompanyServiceImpl implements CompanyService {
 
 		Set<User> linkedUsers = company.getUsers();
 
-		String email = getUser().getEmail();
-		changelogService.logCompanyChange(companyId, email, "delete", companyMapper.toDto(company), null);
 		for (User user : linkedUsers) {
 			user.setCompany(null);
 			tokenRepository.deleteAll(tokenRepository.findAllValidTokensByUser(user.getId()));
@@ -126,6 +125,7 @@ public class CompanyServiceImpl implements CompanyService {
 		feedbacks.forEach(feedback -> feedbackRepository.deleteById(feedback.getId()));
 
 		company.getUsers().clear(); // на всяк випадок, щоб Hibernate не намагався оновлювати зв’язки
+		changelogService.deleteLogFile(Path.of("/app/logs/companies/company-" + companyId + ".log"));
 		companyRepository.delete(company);
 	}
 

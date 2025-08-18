@@ -2,6 +2,7 @@ package org.ua.drmp.company.service.impl;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -210,14 +211,7 @@ public class OfficeServiceImpl implements OfficeService {
 			.map(OfficeCFieldValue::getValue)
 			.toList();
 
-		changelogService.logOfficeChange(
-			office.getId(),
-			getCurrentUserEmail(),
-			"delete",
-			officeMapper.toDto(office),
-			null
-		);
-
+		changelogService.deleteLogFile(Path.of("/app/logs/offices/office-" + officeId + ".log"));
 		officeRepository.delete(office);
 
 		// Перевіряємо, чи залишилися посилання на ці CFieldValue
