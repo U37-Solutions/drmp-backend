@@ -3,6 +3,7 @@ package org.ua.drmp.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -73,11 +74,16 @@ public class User {
 			'}';
 	}
 	public String toJson() {
+		ObjectMapper mapper = new ObjectMapper();
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			return mapper.writeValueAsString(this);
+			ObjectNode node = mapper.createObjectNode();
+			node.put("email", this.email);
+			node.put("firstName", this.firstName);
+			node.put("lastName", this.lastName);
+			return mapper.writeValueAsString(node);
 		} catch (JsonProcessingException e) {
-			return "{}";
+			throw new RuntimeException("Failed to serialize user to JSON", e);
 		}
 	}
+
 }

@@ -22,6 +22,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	private static final String USER_LOG_FILE = BASE_LOG_PATH + "/users/users.log";
 	private static final String COMPANY_LOG_DIR = BASE_LOG_PATH + "/companies";
 	private static final String OFFICE_LOG_DIR = BASE_LOG_PATH + "/offices";
+
 	@Override
 	public void logUserChange(String email, String action, String prevValue, String newValue) {
 		try {
@@ -141,12 +142,23 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 		}
 	}
 
+	@Override
+	public void deleteLogFile(Path path) {
+		try {
+			Files.deleteIfExists(path);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not delete log file");
+		}
+	}
+
 	private ChangeLogEntry parseLogLine(String line) {
 		try {
 			// Expected format:
 			// 2025-07-21 12:34:56 | john@example.com | action: update | prev: ... | new: ...
 			String[] parts = line.split(" \\| ");
-			if (parts.length < 5) return null;
+			if (parts.length < 5) {
+				return null;
+			}
 
 			LocalDateTime timestamp = LocalDateTime.parse(parts[0].trim());
 			String email = parts[1].trim();
