@@ -26,7 +26,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 	@Override
 	public void logUserChange(String email, String action, String prevValue, String newValue) {
 		try {
-			Files.createDirectories(Paths.get("logs/users"));
+			Files.createDirectories(Paths.get("/app/log/users"));
 			LocalDateTime timestamp = LocalDateTime.now();
 
 			String logLine = String.format(
