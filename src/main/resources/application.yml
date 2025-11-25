@@ -37,10 +37,10 @@ springdoc:
     path: /swagger-ui.html
 
 app:
-  base-url: https://base.com
-  admin-url: https://admin.com
+  base-url: ${APP_BASE_URL}
+  admin-url: ${APP_ADMIN_URL}
   admin:
-    email: https://admin-email.com
+    email: ${APP_ADMIN_EMAIL}
 
 logging:
   level:
