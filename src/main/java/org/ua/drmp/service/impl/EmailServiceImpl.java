@@ -29,7 +29,7 @@ public class EmailServiceImpl implements EmailService {
 	@Value("${app.base-url}")
 	private String baseUrl;
 
-	@Value("${spring.mail.username}")
+	@Value("${app.admin.email}")
 	private String senderEmail;
 
 	@Override
@@ -81,8 +81,7 @@ public class EmailServiceImpl implements EmailService {
 		context.setVariable("companyName", company.getName());
 		context.setVariable("reviewLink", baseUrl + "/admin/companies/" + company.getId());
 		String htmlContent = templateEngine.process("company-review-notify.html", context);
-		//TODO: need to send to ADMIN, not for company
-		sendHtmlEmail(company.getEmail(), "Нова компанія чекає підтвердження", htmlContent);
+		sendHtmlEmail(senderEmail, "Нова компанія чекає підтвердження", htmlContent);
 	}
 
 	@Override
