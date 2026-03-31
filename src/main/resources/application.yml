@@ -37,10 +37,10 @@ springdoc:
     path: /swagger-ui.html
 
 app:
-  base-url: https://admin-drmp.u37solutions.com
+  base-url: ${APP_BASE_URL}
+  admin-url: ${APP_ADMIN_URL}
   admin:
-    email: work.voroshchuk.mail@gmail.com
-  # now it's dev link
+    email: ${APP_ADMIN_EMAIL}
 
 logging:
   level:

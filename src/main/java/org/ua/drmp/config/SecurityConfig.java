@@ -4,6 +4,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -31,6 +32,11 @@ public class SecurityConfig {
 
 	private final JwtAuthFilter jwtAuthFilter;
 	private final UserDetailsService userDetailsService;
+
+	@Value("${app.base-url}")
+	private String baseUrl;
+	@Value("${app.admin-url}")
+	private String adminUrl;
 
 	private static final String[] SWAGGER_WHITELIST = {
 		"/swagger-ui/**",
@@ -93,9 +99,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		// TODO: before release please remove incorrect urls
-		configuration.setAllowedOrigins(
-			List.of("http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "https://drmp.u37solutions.com", "https://admin-drmp.u37solutions.com", "https://api-drmp.u37solutions.com"));
+		configuration.setAllowedOrigins(List.of(adminUrl, baseUrl));
 
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		// if in future I will set tokens in header, will need
