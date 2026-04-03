@@ -70,7 +70,7 @@
                     Тепер ви можете увійти до свого облікового запису та почати працювати з платформою.
                   </p>
                   <div>
-                    <a href="https://admin-drmp.u37solutions.com/login" style="display: inline-block; text-decoration: none; padding: 16px 24px; font-size: 16px; line-height: 1; border-radius: 4px; color: #fffffe; background-color: #020617" class="hover-bg-slate-800">
+                    <a th:href="${loginUrl}" style="display: inline-block; text-decoration: none; padding: 16px 24px; font-size: 16px; line-height: 1; border-radius: 4px; color: #fffffe; background-color: #020617" class="hover-bg-slate-800">
                       <!--[if mso]><i style="mso-font-width: 150%; mso-text-raise: 31px" hidden>&emsp;</i><![endif]-->
                       <span style="mso-text-raise: 16px">Перейти на платформу</span>
                       <!--[if mso]><i hidden style="mso-font-width: 150%">&emsp;&#8203;</i><![endif]-->
@@ -79,7 +79,7 @@
                   <div role="separator" style="height: 1px; line-height: 1px; background-color: #cbd5e1; margin-top: 24px; margin-bottom: 24px">&zwj;</div>
                   <p class="mso-break-all" style="margin: 0; font-size: 12px; line-height: 20px; color: #475569">
                     Якщо у вас виникли труднощі з натисканням кнопки "Перейти на платформу", скопіюйте та вставте наступне посилання у ваш веб-браузер:
-                    <a href="https://admin-drmp.u37solutions.com/login" style="color: #1e293b; text-decoration: underline">https://admin-drmp.u37solutions.com/login</a>
+                    <a th:href="${loginUrl}" th:text="${loginUrl}" style="color: #1e293b; text-decoration: underline">link</a>
                   </p>
                 </td>
               </tr>
