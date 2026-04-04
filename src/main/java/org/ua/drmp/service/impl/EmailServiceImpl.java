@@ -56,6 +56,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void sendSuccessfulRegistrationEmail(String email) {
 		Context context = new Context();
+		context.setVariable("loginUrl", baseUrl + "/login");
 		String htmlContent = templateEngine.process("signup-success.html", context);
 		sendHtmlEmail(email, SIGNUP_SUCCESS, htmlContent);
 	}
