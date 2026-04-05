@@ -26,8 +26,8 @@ public class EmailServiceImpl implements EmailService {
 	private final JavaMailSender mailSender;
 	private final SpringTemplateEngine templateEngine;
 
-	@Value("${app.base-url}")
-	private String baseUrl;
+	@Value("${app.admin-url}")
+	private String adminUrl;
 
 	@Value("${app.admin.email}")
 	private String senderEmail;
@@ -36,7 +36,7 @@ public class EmailServiceImpl implements EmailService {
 	public void sendResetPasswordEmail(String email, String token) {
 		Context context = new Context();
 
-		String resetUrl = baseUrl + "/reset-password/" + token;
+		String resetUrl = adminUrl + "/reset-password/" + token;
 		context.setVariable("resetUrl", resetUrl);
 		String htmlContent = templateEngine.process("reset-password.html", context);
 
@@ -46,7 +46,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void sendInviteUserEmail(String email, String token) {
 		Context context = new Context();
-		String acceptUrl = baseUrl + "/sign-up/" + token;
+		String acceptUrl = adminUrl + "/sign-up/" + token;
 		context.setVariable("acceptUrl", acceptUrl);
 		String htmlContent = templateEngine.process("accept-invite.html", context);
 
@@ -56,7 +56,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void sendSuccessfulRegistrationEmail(String email) {
 		Context context = new Context();
-		context.setVariable("loginUrl", baseUrl + "/login");
+		context.setVariable("loginUrl", adminUrl + "/login");
 		String htmlContent = templateEngine.process("signup-success.html", context);
 		sendHtmlEmail(email, SIGNUP_SUCCESS, htmlContent);
 	}
@@ -70,7 +70,7 @@ public class EmailServiceImpl implements EmailService {
 		Context context = new Context();
 		context.setVariable("messageContent", message.getContent());
 		context.setVariable("sentAt", message.getSentAt().toString());
-		context.setVariable("link", baseUrl + "/chats?chatId=" + message.getChat().getId());
+		context.setVariable("link", adminUrl + "/chats?chatId=" + message.getChat().getId());
 
 		String htmlContent = templateEngine.process("new-message.html", context);
 		sendHtmlEmail(message.getChat().getCompany().getEmail(), "Нове повідомлення в чаті", htmlContent);
@@ -80,7 +80,7 @@ public class EmailServiceImpl implements EmailService {
 	public void sendCompanyRegistrationNotification(Company company) {
 		Context context = new Context();
 		context.setVariable("companyName", company.getName());
-		context.setVariable("reviewLink", baseUrl + "/admin/companies/" + company.getId());
+		context.setVariable("reviewLink", adminUrl + "/admin/companies/" + company.getId());
 		String htmlContent = templateEngine.process("company-review-notify.html", context);
 		sendHtmlEmail(senderEmail, "Нова компанія чекає підтвердження", htmlContent);
 	}
@@ -90,7 +90,7 @@ public class EmailServiceImpl implements EmailService {
 		Context context = new Context();
 		context.setVariable("email", to);
 		context.setVariable("password", rawPassword);
-		context.setVariable("loginUrl", baseUrl + "/login");
+		context.setVariable("loginUrl", adminUrl + "/login");
 		String html = templateEngine.process("company-approved.html", context);
 		sendHtmlEmail(to, "Реєстрацію підтверджено", html);
 	}
@@ -110,7 +110,7 @@ public class EmailServiceImpl implements EmailService {
 		Context context = new Context();
 		context.setVariable("email", email);
 		context.setVariable("password", password);
-		context.setVariable("loginUrl", baseUrl + "/login");
+		context.setVariable("loginUrl", adminUrl + "/login");
 		String html = templateEngine.process("invite-company-user.html", context);
 		sendHtmlEmail(email, INVITE_SUBJECT, html);
 	}
