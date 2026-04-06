@@ -102,8 +102,8 @@ public class SecurityConfig {
     configuration.setAllowedOriginPatterns(List.of(
       adminUrl,
       baseUrl,
-      "https://*.vercel.app"
-      "http://localhost:*",
+      "https://*.vercel.app",
+      "http://localhost:*"
     ));
 
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
