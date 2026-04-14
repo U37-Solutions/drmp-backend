@@ -85,6 +85,7 @@ public class PublicMapServiceImpl implements PublicMapService {
 			.isFree(office.getIsFree())
 
 			// Company fields
+			.companyId(company.getId())
 			.companyName(company.getName())
 			.contactName(company.getContactName())
 			.phone(company.getPhone())
