@@ -11,6 +11,7 @@ import org.ua.drmp.company.entity.CFieldStructure;
 import org.ua.drmp.company.entity.CFieldStructureType;
 import org.ua.drmp.company.repo.CFieldStructureRepository;
 import org.ua.drmp.company.repo.CFieldValueRepository;
+import org.ua.drmp.company.repo.OfficeCFieldValueRepository;
 import org.ua.drmp.company.service.CFieldStructureService;
 import org.ua.drmp.exception.BadRequestException;
 import org.ua.drmp.exception.ResourceNotFoundException;
@@ -22,6 +23,7 @@ public class CFieldStructureServiceImpl implements CFieldStructureService {
 	private final CFieldStructureRepository repository;
 	private final CFieldStructureMapper mapper;
 	private final CFieldValueRepository cFieldValueRepository;
+	private final OfficeCFieldValueRepository officeCFieldValueRepository;
 
 	@Override
 	public List<CFieldStructureDto> fetchAll() {
@@ -73,6 +75,7 @@ public class CFieldStructureServiceImpl implements CFieldStructureService {
 			throw new ResourceNotFoundException("CFieldStructure not found");
 		}
 
+		officeCFieldValueRepository.deleteAllByStructureId(id);
 		cFieldValueRepository.deleteByStructureId(id);
 		repository.deleteById(id);
 	}
