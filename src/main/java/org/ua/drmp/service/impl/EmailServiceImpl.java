@@ -80,7 +80,7 @@ public class EmailServiceImpl implements EmailService {
 	public void sendCompanyRegistrationNotification(Company company) {
 		Context context = new Context();
 		context.setVariable("companyName", company.getName());
-		context.setVariable("reviewLink", adminUrl + "/admin/companies/" + company.getId());
+		context.setVariable("reviewLink", adminUrl + "/companies/" + company.getId());
 		String htmlContent = templateEngine.process("company-review-notify.html", context);
 		sendHtmlEmail(senderEmail, "Нова компанія чекає підтвердження", htmlContent);
 	}
