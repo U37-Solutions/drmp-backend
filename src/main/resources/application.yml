@@ -4,19 +4,19 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: work.voroshchuk.mail@gmail.com
-    password: ttsw wygx mbaa wnfv
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
     properties:
       mail:
-          smtp:
-            auth: true
-            starttls:
-              enable: true
-              required: true
-            ssl:
-              trust: smtp.gmail.com
+        smtp:
+          auth: ${SMTP_AUTHENTICATE:true}
+          starttls:
+            enable: ${SMTP_ENABLE_TLS:true}
+            required: ${SMTP_REQUIRE_TLS:true}
+          ssl:
+            trust: ${SMTP_TRUSTED_HOSTS}
 
   jpa:
     hibernate:
